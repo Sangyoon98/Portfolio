@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  /* Very light gray default background */
+  --background: #f7f7f8;
   --foreground: #171717;
 }
 
@@ -28,4 +29,33 @@ body {
 /* Smooth scrolling for in-page anchors */
 html {
   scroll-behavior: smooth;
+}
+
+/* Enable class-based dark mode (in addition to media) */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* Scroll snapping for full-page sections */
+html, body {
+  scroll-snap-type: y mandatory;
+}
+
+/* Simple ambient animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes auroraMove {
+  0% { transform: translate(-50%, 0) rotate(0deg); }
+  50% { transform: translate(-45%, -2%) rotate(10deg); }
+  100% { transform: translate(-50%, 0) rotate(0deg); }
+}
+
+.aurora-blob {
+  filter: blur(48px);
+  animation: auroraMove 18s ease-in-out infinite;
 }

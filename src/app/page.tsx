@@ -1,216 +1,327 @@
+import AnimatedSection from "@/components/AnimatedSection";
+import { profile, skills, projects, activities } from "@/data/portfolio";
+
 export default function Home() {
   return (
     <div className="min-h-screen font-sans">
       {/* 헤더 내비게이션 */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-black/5 dark:border-white/10">
-        <nav className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <a href="#top" className="text-sm font-semibold tracking-tight">
-            Sangyoon
+        <nav className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
+          <a href="#top" className="text-base font-semibold tracking-tight">
+            {profile.name}
           </a>
-          <ul className="flex items-center gap-4 text-sm">
-            <li>
-              <a href="#about" className="hover:underline underline-offset-4">
-                소개
-              </a>
-            </li>
-            <li>
-              <a href="#skills" className="hover:underline underline-offset-4">
-                스킬
-              </a>
-            </li>
-            <li>
-              <a
-                href="#projects"
-                className="hover:underline underline-offset-4"
-              >
-                프로젝트
-              </a>
-            </li>
-            <li>
-              <a
-                href="#education"
-                className="hover:underline underline-offset-4"
-              >
-                교육·활동
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="hover:underline underline-offset-4">
-                연락처
-              </a>
-            </li>
-          </ul>
+          <div className="flex items-center gap-4">
+            <ul className="hidden sm:flex items-center gap-5 text-base">
+              <li>
+                <a href="#about" className="hover:underline underline-offset-4">
+                  소개
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#skills"
+                  className="hover:underline underline-offset-4"
+                >
+                  스킬
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#projects"
+                  className="hover:underline underline-offset-4"
+                >
+                  프로젝트
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#education"
+                  className="hover:underline underline-offset-4"
+                >
+                  교육·활동
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#contact"
+                  className="hover:underline underline-offset-4"
+                >
+                  연락처
+                </a>
+              </li>
+            </ul>
+          </div>
         </nav>
       </header>
 
       {/* 메인 섹션들 */}
-      <main id="top" className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <main id="top" className="w-full">
         {/* 히어로 */}
-        <section aria-labelledby="hero-title" className="py-16 sm:py-24">
-          <h1
-            id="hero-title"
-            className="text-3xl sm:text-4xl font-semibold tracking-tight"
+        <AnimatedSection
+          aria-labelledby="hero-title"
+          className="relative flex items-center bg-white/60 dark:bg-white/[0.02]"
+        >
+          {/* Animated gradient background */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
           >
-            안녕하세요, {"채상윤"} 입니다.
-          </h1>
-          <p className="mt-4 text-sm sm:text-base text-black/70 dark:text-white/70 max-w-2xl">
-            한 문장으로 역할/관심사/가치 제안 요약. 예: 프론트엔드 중심의 풀스택
-            개발자이며, 사용성 높은 인터페이스와 성능 최적화에 관심이 있습니다.
-          </p>
-        </section>
+            <div
+              className="aurora-blob absolute left-1/2 top-0 h-[42rem] w-[42rem] -translate-x-1/2 rounded-full opacity-60 dark:opacity-40"
+              style={{
+                background:
+                  "radial-gradient(circle at center, rgba(99,102,241,0.35), transparent 60%), radial-gradient(circle at 70% 30%, rgba(16,185,129,0.35), transparent 55%), radial-gradient(circle at 30% 70%, rgba(244,114,182,0.35), transparent 55%)",
+              }}
+            />
+          </div>
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-28">
+            <h1
+              id="hero-title"
+              className="text-4xl sm:text-6xl font-semibold tracking-tight"
+            >
+              안녕하세요, {profile.name} 입니다.
+            </h1>
+            <p className="mt-3 text-lg text-black/80 dark:text-white/80">
+              {profile.headline}
+            </p>
+            <p className="mt-4 text-base sm:text-lg text-black/70 dark:text-white/70 max-w-2xl">
+              {profile.summary}
+            </p>
+          </div>
+        </AnimatedSection>
 
         {/* 소개 */}
-        <section
+        <AnimatedSection
           id="about"
           aria-labelledby="about-title"
-          className="py-12 border-t border-black/5 dark:border-white/10"
+          className="bg-[#f8fafc] dark:bg-white/[0.03]"
         >
-          <h2 id="about-title" className="text-xl font-semibold tracking-tight">
-            소개
-          </h2>
-          <p className="mt-3 text-sm text-black/80 dark:text-white/80 leading-6 max-w-3xl">
-            경력 요약, 관심 분야, 강점 등 3~4문장으로 간결하게 소개를
-            적어주세요.
-          </p>
-        </section>
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
+            <h2
+              id="about-title"
+              className="text-2xl sm:text-3xl font-semibold tracking-tight"
+            >
+              소개
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-black/80 dark:text-white/80 leading-7 max-w-3xl">
+              {profile.summary}
+            </p>
+          </div>
+        </AnimatedSection>
 
         {/* 스킬 */}
-        <section
+        <AnimatedSection
           id="skills"
           aria-labelledby="skills-title"
-          className="py-12 border-t border-black/5 dark:border-white/10"
+          className="bg-[#f5faff] dark:bg-white/[0.03]"
         >
-          <h2
-            id="skills-title"
-            className="text-xl font-semibold tracking-tight"
-          >
-            스킬
-          </h2>
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {[
-              "TypeScript",
-              "React / Next.js",
-              "Node.js",
-              "Tailwind CSS",
-              "React Query",
-              "Jest / Testing Library",
-              "AWS / Vercel",
-              "CI/CD",
-            ].map((skill) => (
-              <div
-                key={skill}
-                className="rounded-md border border-black/5 dark:border-white/10 px-3 py-2 text-sm"
-              >
-                {skill}
-              </div>
-            ))}
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
+            <h2
+              id="skills-title"
+              className="text-2xl sm:text-3xl font-semibold tracking-tight"
+            >
+              스킬
+            </h2>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {skills.map((group) => (
+                <div
+                  key={group.category}
+                  className="rounded-lg border border-black/5 dark:border-white/10 p-4 bg-white/60 dark:bg-white/[0.02]"
+                >
+                  <h3 className="text-base font-semibold mb-3">
+                    {group.category}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {group.items.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 px-2.5 py-1 text-sm"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </section>
+        </AnimatedSection>
 
         {/* 프로젝트 */}
-        <section
+        <AnimatedSection
           id="projects"
           aria-labelledby="projects-title"
-          className="py-12 border-t border-black/5 dark:border-white/10"
+          className="bg-[#fff7f5] dark:bg-white/[0.03]"
         >
-          <h2
-            id="projects-title"
-            className="text-xl font-semibold tracking-tight"
-          >
-            프로젝트
-          </h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <article
-                key={i}
-                className="rounded-lg border border-black/5 dark:border-white/10 p-4"
-              >
-                <h3 className="font-semibold">프로젝트 제목 {i}</h3>
-                <p className="mt-2 text-sm text-black/70 dark:text-white/70">
-                  프로젝트 간단 설명(문제/해결/성과). 사용 기술: Next.js, TS 등
-                </p>
-                <div className="mt-3 flex gap-3 text-sm">
-                  <a href="#" className="underline underline-offset-4">
-                    GitHub
-                  </a>
-                  <a href="#" className="underline underline-offset-4">
-                    Demo
-                  </a>
-                </div>
-              </article>
-            ))}
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
+            <h2
+              id="projects-title"
+              className="text-2xl sm:text-3xl font-semibold tracking-tight"
+            >
+              프로젝트
+            </h2>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+              {projects.map((p) => (
+                <article
+                  key={p.title}
+                  className="rounded-lg border border-black/5 dark:border-white/10 p-5 transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg/10 bg-white/70 dark:bg-white/[0.02]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <h3 className="text-lg font-semibold">{p.title}</h3>
+                    {p.period && (
+                      <span className="text-xs text-black/60 dark:text-white/60 whitespace-nowrap">
+                        {p.period}
+                      </span>
+                    )}
+                  </div>
+                  {p.role && (
+                    <p className="mt-1 text-xs text-black/60 dark:text-white/60">
+                      역할: {p.role}
+                    </p>
+                  )}
+                  <p className="mt-3 text-sm sm:text-base text-black/70 dark:text-white/70">
+                    {p.description}
+                  </p>
+                  {p.tech?.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {p.tech.map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 px-2 py-0.5 text-xs"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {p.links?.length ? (
+                    <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                      {p.links.map((l) => (
+                        <a
+                          key={`${p.title}-${l.label}`}
+                          href={l.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          {l.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
           </div>
-        </section>
+        </AnimatedSection>
 
         {/* 교육 및 활동 */}
-        <section
+        <AnimatedSection
           id="education"
           aria-labelledby="education-title"
-          className="py-12 border-t border-black/5 dark:border-white/10"
+          className="bg-[#f7fff8] dark:bg-white/[0.03]"
         >
-          <h2
-            id="education-title"
-            className="text-xl font-semibold tracking-tight"
-          >
-            교육 및 활동
-          </h2>
-          <ul className="mt-4 space-y-3">
-            {[1, 2, 3].map((i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="mt-1 h-2 w-2 rounded-full bg-black/30 dark:bg-white/40" />
-                <div>
-                  <p className="text-sm font-medium">교육/활동명 {i}</p>
-                  <p className="text-xs text-black/60 dark:text-white/60">
-                    기관 · 연도 · 간단 설명
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
+            <h2
+              id="education-title"
+              className="text-2xl sm:text-3xl font-semibold tracking-tight"
+            >
+              교육 및 활동
+            </h2>
+            <ul className="mt-6 space-y-4">
+              {activities.map((a, idx) => (
+                <li
+                  key={`${a.title}-${idx}`}
+                  className="flex items-start gap-3"
+                >
+                  <span className="mt-2 h-2 w-2 rounded-full bg-black/30 dark:bg-white/40" />
+                  <div>
+                    <p className="text-base font-medium">{a.title}</p>
+                    <p className="text-sm text-black/60 dark:text-white/60">
+                      {[a.org, a.period].filter(Boolean).join(" · ")}
+                    </p>
+                    {a.description && (
+                      <p className="text-sm text-black/70 dark:text-white/70 mt-1">
+                        {a.description}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </AnimatedSection>
 
         {/* 연락처 */}
-        <section
+        <AnimatedSection
           id="contact"
           aria-labelledby="contact-title"
-          className="py-12 border-t border-black/5 dark:border-white/10"
+          className="bg-[#f9f5ff] dark:bg-white/[0.03]"
         >
-          <h2
-            id="contact-title"
-            className="text-xl font-semibold tracking-tight"
-          >
-            연락처
-          </h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <a
-              href="mailto:your@email.com"
-              className="rounded-md border border-black/5 dark:border-white/10 p-3 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
+            <h2
+              id="contact-title"
+              className="text-2xl sm:text-3xl font-semibold tracking-tight"
             >
-              이메일: your@email.com
-            </a>
-            <a
-              href="https://linkedin.com/in/your"
-              target="_blank"
-              className="rounded-md border border-black/5 dark:border-white/10 p-3 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-            >
-              LinkedIn: /in/your
-            </a>
-            <a
-              href="https://github.com/your"
-              target="_blank"
-              className="rounded-md border border-black/5 dark:border-white/10 p-3 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-            >
-              GitHub: @your
-            </a>
-            <a
-              href="https://your-blog.com"
-              target="_blank"
-              className="rounded-md border border-black/5 dark:border-white/10 p-3 text-sm hover:bg-black/5 dark:hover:bg-white/5"
-            >
-              Blog: your-blog.com
-            </a>
+              연락처
+            </h2>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {profile.contact.email && (
+                <a
+                  href={`mailto:${profile.contact.email}`}
+                  className="rounded-md border border-black/5 dark:border-white/10 p-4 text-base hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  이메일: {profile.contact.email}
+                </a>
+              )}
+              {profile.contact.linkedin && (
+                <a
+                  href={profile.contact.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-black/5 dark:border-white/10 p-4 text-base hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  LinkedIn: {new URL(profile.contact.linkedin).pathname}
+                </a>
+              )}
+              {profile.contact.github && (
+                <a
+                  href={profile.contact.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-black/5 dark:border-white/10 p-4 text-base hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  GitHub:{" "}
+                  {new URL(profile.contact.github).pathname.replace("/", "@")}
+                </a>
+              )}
+              {profile.contact.blog && (
+                <a
+                  href={profile.contact.blog}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-black/5 dark:border-white/10 p-4 text-base hover:bg-black/5 dark:hover:bg-white/5"
+                >
+                  Blog: {new URL(profile.contact.blog).host}
+                </a>
+              )}
+            </div>
+            {profile.contact.notion && (
+              <p className="mt-4 text-sm text-black/60 dark:text-white/60">
+                상세 포트폴리오는{" "}
+                <a
+                  href={profile.contact.notion}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4"
+                >
+                  Notion
+                </a>
+                에서 확인할 수 있어요.
+              </p>
+            )}
           </div>
-        </section>
+        </AnimatedSection>
       </main>
 
       <footer className="mt-16 border-t border-black/5 dark:border-white/10">
