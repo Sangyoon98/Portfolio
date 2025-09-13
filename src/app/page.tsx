@@ -1,5 +1,7 @@
 import AnimatedSection from "@/components/AnimatedSection";
 import { profile, skills, projects, activities } from "@/data/portfolio";
+import Image from "next/image";
+import RichText from "@/components/RichText";
 
 export default function Home() {
   return (
@@ -59,7 +61,7 @@ export default function Home() {
         {/* 히어로 */}
         <AnimatedSection
           aria-labelledby="hero-title"
-          className="relative flex items-center bg-white/60 dark:bg-white/[0.02]"
+          className="relative flex items-center bg-white dark:bg-white/[0.02]"
         >
           {/* Animated gradient background */}
           <div
@@ -79,14 +81,12 @@ export default function Home() {
               id="hero-title"
               className="text-4xl sm:text-6xl font-semibold tracking-tight"
             >
-              안녕하세요, {profile.name} 입니다.
+              {profile.tagline}
             </h1>
-            <p className="mt-3 text-lg text-black/80 dark:text-white/80">
-              {profile.headline}
-            </p>
-            <p className="mt-4 text-base sm:text-lg text-black/70 dark:text-white/70 max-w-2xl">
-              {profile.summary}
-            </p>
+            <RichText
+              text={profile.summary}
+              className="mt-4 text-base sm:text-lg text-black/70 dark:text-white/70 max-w-3xl"
+            />
           </div>
         </AnimatedSection>
 
@@ -94,7 +94,7 @@ export default function Home() {
         <AnimatedSection
           id="about"
           aria-labelledby="about-title"
-          className="bg-[#f8fafc] dark:bg-white/[0.03]"
+          className="bg-white dark:bg-white/[0.02]"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
             <h2
@@ -103,9 +103,73 @@ export default function Home() {
             >
               소개
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-black/80 dark:text-white/80 leading-7 max-w-3xl">
-              {profile.summary}
-            </p>
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-[220px,1fr] gap-8 items-start">
+              <div className="flex items-center justify-center md:justify-start">
+                <div className="w-44 max-w-[220px] rounded-2xl overflow-hidden border border-black/10 dark:border-white/15 bg-white/50 dark:bg-white/[0.03]">
+                  {profile.avatar ? (
+                    <Image
+                      src={profile.avatar}
+                      alt={`${profile.name} 프로필 사진`}
+                      width={0}
+                      height={0}
+                      sizes="176px"
+                      style={{ width: "100%", height: "auto" }}
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-sm text-black/60 dark:text-white/60">
+                      No Image
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <RichText
+                  text={profile.summary}
+                  className="text-base sm:text-lg text-black/80 dark:text-white/80 leading-7 max-w-3xl"
+                />
+                <dl className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  {profile.birthday && (
+                    <div>
+                      <dt className="text-black/60 dark:text-white/60">
+                        생년월일
+                      </dt>
+                      <dd className="font-medium">{profile.birthday}</dd>
+                    </div>
+                  )}
+                  {profile.contact.email && (
+                    <div>
+                      <dt className="text-black/60 dark:text-white/60">
+                        이메일
+                      </dt>
+                      <dd className="font-medium">
+                        <a
+                          href={`mailto:${profile.contact.email}`}
+                          className="underline underline-offset-4"
+                        >
+                          {profile.contact.email}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                  {profile.contact.phone && (
+                    <div>
+                      <dt className="text-black/60 dark:text-white/60">
+                        전화번호
+                      </dt>
+                      <dd className="font-medium">
+                        <a
+                          href={`tel:${profile.contact.phone}`}
+                          className="underline underline-offset-4"
+                        >
+                          {profile.contact.phone}
+                        </a>
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </div>
           </div>
         </AnimatedSection>
 
@@ -113,7 +177,7 @@ export default function Home() {
         <AnimatedSection
           id="skills"
           aria-labelledby="skills-title"
-          className="bg-[#f5faff] dark:bg-white/[0.03]"
+          className="bg-[#f4f4f5] dark:bg-white/[0.04]"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
             <h2
@@ -151,7 +215,7 @@ export default function Home() {
         <AnimatedSection
           id="projects"
           aria-labelledby="projects-title"
-          className="bg-[#fff7f5] dark:bg-white/[0.03]"
+          className="bg-white dark:bg-white/[0.02]"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
             <h2
@@ -219,7 +283,7 @@ export default function Home() {
         <AnimatedSection
           id="education"
           aria-labelledby="education-title"
-          className="bg-[#f7fff8] dark:bg-white/[0.03]"
+          className="bg-[#f4f4f5] dark:bg-white/[0.04]"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
             <h2
@@ -256,7 +320,7 @@ export default function Home() {
         <AnimatedSection
           id="contact"
           aria-labelledby="contact-title"
-          className="bg-[#f9f5ff] dark:bg-white/[0.03]"
+          className="bg-white dark:bg-white/[0.02]"
         >
           <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
             <h2

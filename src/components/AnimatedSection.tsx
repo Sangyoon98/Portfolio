@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Props = React.ComponentProps<"section"> & {
-  as?: keyof JSX.IntrinsicElements;
-};
+type Props = React.ComponentProps<"section">;
 
-export default function AnimatedSection({ as: Tag = "section", className = "", children, ...rest }: Props) {
+export default function AnimatedSection({ className = "", children, ...rest }: Props) {
   const ref = useRef<HTMLElement | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -29,18 +27,17 @@ export default function AnimatedSection({ as: Tag = "section", className = "", c
   }, []);
 
   return (
-    <Tag
-      ref={ref as any}
+    <section
+      ref={ref}
       className={[
-        "min-h-screen snap-start scroll-mt-14", // scroll snapping/anchor offset
-        "transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]", // smooth entrance
+        "min-h-screen snap-start scroll-mt-14",
+        "transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3",
         className,
       ].join(" ")}
       {...rest}
     >
       {children}
-    </Tag>
+    </section>
   );
 }
-
