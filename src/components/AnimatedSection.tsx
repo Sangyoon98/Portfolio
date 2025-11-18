@@ -30,7 +30,7 @@ export default function AnimatedSection({ className = "", children, ...rest }: P
     <section
       ref={ref}
       className={[
-        "min-h-screen snap-start scroll-mt-14",
+        "min-h-screen scroll-mt-14",
         "transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
         inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3",
         className,

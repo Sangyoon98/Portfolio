@@ -26,20 +26,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Smooth scrolling for in-page anchors */
-html {
-  scroll-behavior: smooth;
-}
-
 /* Enable class-based dark mode (in addition to media) */
 .dark {
   --background: #0a0a0a;
   --foreground: #ededed;
-}
-
-/* Scroll snapping for full-page sections */
-html, body {
-  scroll-snap-type: y mandatory;
 }
 
 /* Simple ambient animations */
