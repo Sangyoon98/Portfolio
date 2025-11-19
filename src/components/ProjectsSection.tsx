@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
-import SectionTitle from "@/components/SectionTitle";
 import { projects } from "@/data/portfolio";
 
 // 프로젝트 제목을 slug로 변환하는 함수
@@ -31,7 +30,7 @@ export default function ProjectsSection() {
     <motion.section
       id="projects"
       aria-labelledby="projects-title"
-      className="bg-[#f4f4f5] dark:bg-white/[0.04] min-h-screen scroll-mt-14"
+      className="bg-[#f4f4f5] dark:bg-white/[0.04] scroll-mt-14"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
@@ -41,12 +40,18 @@ export default function ProjectsSection() {
       }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
-        <SectionTitle
-          id="projects-title"
-          title="Projects"
-          description="직접 개발하고 배포한 프로젝트들입니다."
-          className="mb-8"
-        />
+        <div className="text-center mb-12">
+          <h2
+            id="projects-title"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
+          >
+            Projects
+          </h2>
+          <div className="w-16 h-1 bg-purple-500 mx-auto mb-4"></div>
+          <p className="text-base text-black/70 dark:text-white/70">
+            직접 개발하고 배포한 프로젝트들입니다.
+          </p>
+        </div>
 
         <motion.div
           className="grid gap-6 sm:grid-cols-2"
@@ -73,4 +78,3 @@ export default function ProjectsSection() {
     </motion.section>
   );
 }
-

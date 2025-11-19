@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import SectionTitle from "@/components/SectionTitle";
 import { activities } from "@/data/portfolio";
 
 // 교육 및 활동 섹션 컴포넌트
@@ -10,7 +9,7 @@ export default function EducationSection() {
     <motion.section
       id="education"
       aria-labelledby="education-title"
-      className="bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
+      className="bg-white dark:bg-white/[0.02] scroll-mt-14"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
@@ -20,12 +19,18 @@ export default function EducationSection() {
       }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
-        <SectionTitle
-          id="education-title"
-          title="교육 및 대외활동"
-          description="지속적인 학습과 성장을 위한 교육 과정과 대외활동 경험입니다."
-          className="mb-8"
-        />
+        <div className="text-center mb-12">
+          <h2
+            id="education-title"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
+          >
+            Education & Activities
+          </h2>
+          <div className="w-16 h-1 bg-purple-500 mx-auto mb-4"></div>
+          <p className="text-base text-black/70 dark:text-white/70">
+            지속적인 학습과 성장을 위한 교육 과정과 대외활동 경험입니다.
+          </p>
+        </div>
 
         <div className="space-y-6">
           {activities.map((activity, index) => (

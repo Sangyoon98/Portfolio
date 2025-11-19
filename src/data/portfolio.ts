@@ -412,7 +412,7 @@ export const projects: Project[] = [
       { label: "상세 보기", href: "/projects/strocare" },
     ],
     period: "2024.01. ~ 2024.03.",
-    role: "Mobile App Developer",
+    role: "Android Developer",
     company: "(주)헬로비즈",
     image: "/projects/strocare/heuron.png",
     images: [
@@ -438,7 +438,7 @@ export const projects: Project[] = [
       { label: "상세 보기", href: "/projects/kangnam-nutrition" },
     ],
     period: "2023.12. ~ 2024.05.",
-    role: "Mobile App Developer",
+    role: "Android Developer",
     company: "(주)헬로비즈",
     image: "/projects/kangnam-nutrition/nutritioncare.png",
     images: [
@@ -468,7 +468,7 @@ export const projects: Project[] = [
       { label: "상세 보기", href: "/projects/lunch-time" },
     ],
     period: "2023.11. ~ 2023.12.",
-    role: "Mobile App Developer",
+    role: "Android Developer",
     company: "(주)헬로비즈",
     image: "/projects/lunch-time/launchtime.png",
     images: [

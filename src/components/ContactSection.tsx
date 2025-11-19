@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import ContactCard from "@/components/ContactCard";
-import SectionTitle from "@/components/SectionTitle";
 import { profile } from "@/data/portfolio";
 
 // 연락처 섹션 컴포넌트
@@ -57,7 +56,7 @@ export default function ContactSection() {
     <motion.section
       id="contact"
       aria-labelledby="contact-title"
-      className="bg-[#f4f4f5] dark:bg-white/[0.04] min-h-screen scroll-mt-14"
+      className="bg-[#f4f4f5] dark:bg-white/[0.04] scroll-mt-14"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
@@ -67,12 +66,18 @@ export default function ContactSection() {
       }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
-        <SectionTitle
-          id="contact-title"
-          title="Contact Me"
-          description="새로운 기회와 협업에 항상 열려있습니다. 언제든 연락 주세요!"
-          className="mb-8"
-        />
+        <div className="text-center mb-12">
+          <h2
+            id="contact-title"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
+          >
+            Contact
+          </h2>
+          <div className="w-16 h-1 bg-purple-500 mx-auto mb-4"></div>
+          <p className="text-base text-black/70 dark:text-white/70">
+            새로운 기회와 협업에 항상 열려있습니다. 언제든 연락 주세요!
+          </p>
+        </div>
 
         {/* 연락처 카드들 */}
         <motion.div

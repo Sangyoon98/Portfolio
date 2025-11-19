@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { profile } from "@/data/portfolio";
@@ -17,7 +17,13 @@ type GuestbookEntry = {
 export default function GuestbookPage() {
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const itemsPerPage = 10;
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -26,22 +32,85 @@ export default function GuestbookPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState("");
   const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   // 방명록 목록 가져오기
-  const fetchEntries = async () => {
+  const fetchEntries = async (reset = false, page?: number) => {
     try {
-      const response = await fetch("/api/guestbook");
+      let currentOffset: number;
+      let currentPageNum: number;
+
+      if (page !== undefined) {
+        // 페이지 번호로 직접 이동 (데스크톱)
+        currentPageNum = page;
+        currentOffset = (page - 1) * itemsPerPage;
+        setCurrentPage(page);
+      } else if (reset) {
+        // 초기 로드 또는 리셋
+        currentPageNum = 1;
+        currentOffset = 0;
+        setCurrentPage(1);
+      } else {
+        // 무한 스크롤 (모바일)
+        currentOffset = offset;
+        currentPageNum = currentPage;
+      }
+
+      const response = await fetch(
+        `/api/guestbook?limit=${itemsPerPage}&offset=${currentOffset}`
+      );
       const data = await response.json();
-      setEntries(data.entries || []);
+
+      if (reset || page !== undefined) {
+        setEntries(data.entries || []);
+        setOffset((page || 1) * itemsPerPage);
+      } else {
+        // 무한 스크롤: 기존 항목에 추가
+        setEntries((prev) => [...prev, ...(data.entries || [])]);
+        setOffset((prev) => prev + itemsPerPage);
+      }
+      setHasMore(data.hasMore || false);
+      setTotal(data.total || 0);
     } catch (error) {
       console.error("Failed to fetch guestbook:", error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
+  // 무한 스크롤: 추가 데이터 로드
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchEntries(false);
+  }, [loadingMore, hasMore, offset]);
+
+  // Intersection Observer로 스크롤 감지
   useEffect(() => {
-    fetchEntries();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, loadMore]);
+
+  useEffect(() => {
+    fetchEntries(true);
   }, []);
 
   // 방명록 작성
@@ -71,7 +140,9 @@ export default function GuestbookPage() {
       setName("");
       setMessage("");
       // 목록 새로고침
-      await fetchEntries();
+      setOffset(0);
+      setCurrentPage(1);
+      await fetchEntries(true);
       
       // 3초 후 성공 메시지 제거
       setTimeout(() => setSuccess(false), 3000);
@@ -119,7 +190,9 @@ export default function GuestbookPage() {
       setShowPasswordModal(false);
       setPassword("");
       setTargetDeleteId(null);
-      await fetchEntries();
+      setOffset(0);
+      setCurrentPage(1);
+      await fetchEntries(true);
     } catch (error) {
       setError("방명록 삭제에 실패했습니다.");
     } finally {
@@ -144,7 +217,7 @@ export default function GuestbookPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-white/[0.02]">
+    <div className="bg-white dark:bg-white/[0.02]">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-black/5 dark:border-white/10">
         <nav className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -286,7 +359,7 @@ export default function GuestbookPage() {
                         <button
                           onClick={() => handleDeleteClick(entry.id)}
                           disabled={deletingId === entry.id}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50"
+                          className="hidden group-hover:block px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
                           title="삭제"
                         >
                           {deletingId === entry.id ? "삭제 중..." : "삭제"}
@@ -297,11 +370,90 @@ export default function GuestbookPage() {
                       {entry.message}
                     </p>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {/* 무한 스크롤 트리거 (모바일) */}
+            {hasMore && (
+              <div
+                ref={observerTarget}
+                className="py-8 text-center sm:hidden"
+              >
+                {loadingMore && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    더 불러오는 중...
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* 데스크톱: 페이지네이션 */}
+            {total > itemsPerPage && (
+              <div className="hidden sm:flex items-center justify-center gap-2 py-8">
+                <button
+                  onClick={() => fetchEntries(false, currentPage - 1)}
+                  disabled={currentPage === 1 || loading}
+                  className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  이전
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from(
+                    { length: Math.ceil(total / itemsPerPage) },
+                    (_, i) => i + 1
+                  )
+                    .filter((page) => {
+                      // 현재 페이지 주변 2페이지씩만 표시
+                      const totalPages = Math.ceil(total / itemsPerPage);
+                      if (totalPages <= 7) return true; // 전체 페이지가 7개 이하면 모두 표시
+                      if (page === 1 || page === totalPages) return true; // 첫 페이지와 마지막 페이지
+                      return (
+                        page >= currentPage - 2 && page <= currentPage + 2
+                      );
+                    })
+                    .map((page, index, array) => {
+                      // 생략 표시 추가
+                      const prevPage = array[index - 1];
+                      const showEllipsis = prevPage && page - prevPage > 1;
+
+                      return (
+                        <div key={page} className="flex items-center gap-1">
+                          {showEllipsis && (
+                            <span className="px-2 text-gray-500 dark:text-gray-400">
+                              ...
+                            </span>
+                          )}
+                          <button
+                            onClick={() => fetchEntries(false, page)}
+                            disabled={loading}
+                            className={`min-w-[40px] px-3 py-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                              currentPage === page
+                                ? "bg-purple-600 dark:bg-purple-500 text-white border-purple-600 dark:border-purple-500"
+                                : "border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1]"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                <button
+                  onClick={() => fetchEntries(false, currentPage + 1)}
+                  disabled={
+                    currentPage >= Math.ceil(total / itemsPerPage) || loading
+                  }
+                  className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  다음
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </motion.div>
       </main>
 
       {/* 비밀번호 확인 모달 */}

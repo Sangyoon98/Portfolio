@@ -84,19 +84,35 @@ async function writeGuestbook(entries: GuestbookEntry[]) {
   }
 }
 
-// GET: 방명록 목록 조회
-export async function GET() {
+// GET: 방명록 목록 조회 (페이징 지원)
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const offset = parseInt(searchParams.get("offset") || "0", 10);
+
     const entries = await readGuestbook();
     // 최신순으로 정렬
     const sortedEntries = entries.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-    return NextResponse.json({ entries: sortedEntries });
+
+    // 페이징 처리
+    const paginatedEntries = sortedEntries.slice(offset, offset + limit);
+    const hasMore = offset + limit < sortedEntries.length;
+
+    return NextResponse.json({
+      entries: paginatedEntries,
+      total: sortedEntries.length,
+      hasMore,
+    });
   } catch (error) {
     console.error("Error reading guestbook:", error);
-    return NextResponse.json({ entries: [] }, { status: 500 });
+    return NextResponse.json(
+      { entries: [], total: 0, hasMore: false },
+      { status: 500 }
+    );
   }
 }
 

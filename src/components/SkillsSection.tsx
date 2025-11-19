@@ -73,7 +73,7 @@ export default function SkillsSection() {
     <motion.section
       id="skills"
       aria-labelledby="skills-title"
-      className="bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
+      className="bg-white dark:bg-white/[0.02] scroll-mt-14"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
