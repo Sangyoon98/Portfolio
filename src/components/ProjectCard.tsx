@@ -4,19 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-// 프로젝트 타입 (portfolio.ts에서 가져온 타입 구조 참고)
-type Project = {
-  title: string;
-  description: string;
-  image?: string;
-  featured?: boolean;
-  period?: string;
-  role?: string;
-  company?: string;
-  status?: string;
-  tech?: string[];
-  links?: Array<{ label: string; url: string }>;
-};
+import { Project } from "@/data/portfolio";
 
 type ProjectCardProps = {
   project: Project;
@@ -123,4 +111,3 @@ export default function ProjectCard({ project, slug }: ProjectCardProps) {
     </motion.div>
   );
 }
-
