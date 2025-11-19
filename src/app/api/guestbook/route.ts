@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
@@ -11,11 +12,36 @@ type GuestbookEntry = {
   createdAt: string;
 };
 
-// 데이터 파일 경로
+// Upstash Redis 키
+const GUESTBOOK_KEY = "guestbook:entries";
+
+// 로컬 파일 시스템 경로 (fallback용)
 const dataDir = path.join(process.cwd(), "data");
 const dataFile = path.join(dataDir, "guestbook.json");
 
-// 데이터 디렉토리 및 파일 초기화
+// Upstash Redis 클라이언트 초기화
+const getRedisClient = () => {
+  if (
+    process.env.UPSTASH_REDIS_REST_URL &&
+    process.env.UPSTASH_REDIS_REST_TOKEN
+  ) {
+    return new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+  return null;
+};
+
+// Upstash Redis 사용 가능 여부 확인
+const isRedisAvailable = () => {
+  return !!(
+    process.env.UPSTASH_REDIS_REST_URL &&
+    process.env.UPSTASH_REDIS_REST_TOKEN
+  );
+};
+
+// 로컬 파일 시스템 초기화
 async function ensureDataFile() {
   if (!existsSync(dataDir)) {
     await mkdir(dataDir, { recursive: true });
@@ -27,19 +53,45 @@ async function ensureDataFile() {
 
 // 방명록 데이터 읽기
 async function readGuestbook(): Promise<GuestbookEntry[]> {
-  await ensureDataFile();
   try {
+    // Upstash Redis가 설정되어 있으면 사용
+    if (isRedisAvailable()) {
+      const redis = getRedisClient();
+      if (redis) {
+        const entries = await redis.get<GuestbookEntry[]>(GUESTBOOK_KEY);
+        return entries || [];
+      }
+    }
+    // 로컬 개발 환경에서는 파일 시스템 사용
+    await ensureDataFile();
     const data = await readFile(dataFile, "utf-8");
     return JSON.parse(data);
-  } catch {
+  } catch (error) {
+    console.error("Error reading guestbook:", error);
     return [];
   }
 }
 
 // 방명록 데이터 쓰기
 async function writeGuestbook(entries: GuestbookEntry[]) {
-  await ensureDataFile();
-  await writeFile(dataFile, JSON.stringify(entries, null, 2), "utf-8");
+  try {
+    // Upstash Redis가 설정되어 있으면 사용
+    if (isRedisAvailable()) {
+      const redis = getRedisClient();
+      if (redis) {
+        await redis.set(GUESTBOOK_KEY, entries);
+        return;
+      }
+    }
+    // 로컬 개발 환경에서는 파일 시스템 사용
+    await ensureDataFile();
+    await writeFile(dataFile, JSON.stringify(entries, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error writing guestbook:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "알 수 없는 오류";
+    throw new Error(`데이터 저장 실패: ${errorMessage}`);
+  }
 }
 
 // GET: 방명록 목록 조회
@@ -105,10 +157,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, entry: newEntry });
   } catch (error) {
     console.error("Error writing guestbook:", error);
-    return NextResponse.json(
-      { error: "방명록 작성에 실패했습니다." },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "방명록 작성에 실패했습니다.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -150,9 +203,10 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting guestbook:", error);
-    return NextResponse.json(
-      { error: "방명록 삭제에 실패했습니다." },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "방명록 삭제에 실패했습니다.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
