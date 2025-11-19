@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Redis } from "@upstash/redis";
+import { kv } from "@vercel/kv";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
@@ -12,33 +12,16 @@ type GuestbookEntry = {
   createdAt: string;
 };
 
-// Upstash Redis 키
+// Vercel KV 키
 const GUESTBOOK_KEY = "guestbook:entries";
 
 // 로컬 파일 시스템 경로 (fallback용)
 const dataDir = path.join(process.cwd(), "data");
 const dataFile = path.join(dataDir, "guestbook.json");
 
-// Upstash Redis 클라이언트 초기화
-const getRedisClient = () => {
-  if (
-    process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
-  ) {
-    return new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
-    });
-  }
-  return null;
-};
-
-// Upstash Redis 사용 가능 여부 확인
-const isRedisAvailable = () => {
-  return !!(
-    process.env.UPSTASH_REDIS_REST_URL &&
-    process.env.UPSTASH_REDIS_REST_TOKEN
-  );
+// Vercel KV 사용 가능 여부 확인
+const isKVAvailable = () => {
+  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 };
 
 // 로컬 파일 시스템 초기화
@@ -54,15 +37,19 @@ async function ensureDataFile() {
 // 방명록 데이터 읽기
 async function readGuestbook(): Promise<GuestbookEntry[]> {
   try {
-    // Upstash Redis가 설정되어 있으면 사용
-    if (isRedisAvailable()) {
-      const redis = getRedisClient();
-      if (redis) {
-        const entries = await redis.get<GuestbookEntry[]>(GUESTBOOK_KEY);
-        return entries || [];
-      }
+    // Vercel KV가 설정되어 있으면 사용
+    if (isKVAvailable()) {
+      const entries = await kv.get<GuestbookEntry[]>(GUESTBOOK_KEY);
+      return entries || [];
     }
-    // 로컬 개발 환경에서는 파일 시스템 사용
+    // 배포 환경에서는 KV가 필수
+    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+      console.error(
+        "Vercel KV가 설정되지 않았습니다. 환경 변수를 확인해주세요."
+      );
+      return [];
+    }
+    // 로컬 개발 환경에서만 파일 시스템 사용
     await ensureDataFile();
     const data = await readFile(dataFile, "utf-8");
     return JSON.parse(data);
@@ -75,15 +62,18 @@ async function readGuestbook(): Promise<GuestbookEntry[]> {
 // 방명록 데이터 쓰기
 async function writeGuestbook(entries: GuestbookEntry[]) {
   try {
-    // Upstash Redis가 설정되어 있으면 사용
-    if (isRedisAvailable()) {
-      const redis = getRedisClient();
-      if (redis) {
-        await redis.set(GUESTBOOK_KEY, entries);
-        return;
-      }
+    // Vercel KV가 설정되어 있으면 사용
+    if (isKVAvailable()) {
+      await kv.set(GUESTBOOK_KEY, entries);
+      return;
     }
-    // 로컬 개발 환경에서는 파일 시스템 사용
+    // 배포 환경에서는 KV가 필수
+    if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Vercel KV가 설정되지 않았습니다. Vercel 대시보드에서 KV를 생성하고 환경 변수를 확인해주세요."
+      );
+    }
+    // 로컬 개발 환경에서만 파일 시스템 사용
     await ensureDataFile();
     await writeFile(dataFile, JSON.stringify(entries, null, 2), "utf-8");
   } catch (error) {
@@ -158,9 +148,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error writing guestbook:", error);
     const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "방명록 작성에 실패했습니다.";
+      error instanceof Error ? error.message : "방명록 작성에 실패했습니다.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
@@ -204,9 +192,7 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Error deleting guestbook:", error);
     const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "방명록 삭제에 실패했습니다.";
+      error instanceof Error ? error.message : "방명록 삭제에 실패했습니다.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
