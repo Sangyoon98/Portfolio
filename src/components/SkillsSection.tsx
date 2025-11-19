@@ -1,8 +1,7 @@
 "use client";
 
-import AnimatedSection from "@/components/AnimatedSection";
-import SkillCard from "@/components/SkillCard";
 import { motion } from "framer-motion";
+import SkillCard from "@/components/SkillCard";
 
 // 스킬 섹션 컴포넌트
 export default function SkillsSection() {
@@ -71,10 +70,17 @@ export default function SkillsSection() {
   ];
 
   return (
-    <AnimatedSection
+    <motion.section
       id="skills"
       aria-labelledby="skills-title"
-      className="bg-white dark:bg-white/[0.02]"
+      className="bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
         <div className="text-center mb-12">
@@ -108,7 +114,7 @@ export default function SkillsSection() {
           ))}
         </motion.div>
       </div>
-    </AnimatedSection>
+    </motion.section>
   );
 }
 

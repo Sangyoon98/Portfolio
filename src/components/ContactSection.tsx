@@ -1,9 +1,8 @@
 "use client";
 
-import AnimatedSection from "@/components/AnimatedSection";
+import { motion } from "framer-motion";
 import ContactCard from "@/components/ContactCard";
 import SectionTitle from "@/components/SectionTitle";
-import { motion } from "framer-motion";
 import { profile } from "@/data/portfolio";
 
 // 연락처 섹션 컴포넌트
@@ -55,10 +54,17 @@ export default function ContactSection() {
   }
 
   return (
-    <AnimatedSection
+    <motion.section
       id="contact"
       aria-labelledby="contact-title"
-      className="bg-[#f4f4f5] dark:bg-white/[0.04]"
+      className="bg-[#f4f4f5] dark:bg-white/[0.04] min-h-screen scroll-mt-14"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
         <SectionTitle
@@ -123,7 +129,7 @@ export default function ContactSection() {
           </div>
         )}
       </div>
-    </AnimatedSection>
+    </motion.section>
   );
 }
 

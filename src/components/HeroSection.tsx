@@ -1,13 +1,22 @@
-import AnimatedSection from "@/components/AnimatedSection";
+"use client";
+
+import { motion } from "framer-motion";
 import RichText from "@/components/RichText";
 import { profile } from "@/data/portfolio";
 
 // 히어로 섹션 컴포넌트
 export default function HeroSection() {
   return (
-    <AnimatedSection
+    <motion.section
       aria-labelledby="hero-title"
-      className="relative flex items-center bg-white dark:bg-white/[0.02]"
+      className="relative flex items-center bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       {/* 배경 그라데이션 */}
       <div
@@ -35,7 +44,7 @@ export default function HeroSection() {
           className="mt-6 text-base sm:text-lg text-black/70 dark:text-white/70 max-w-3xl leading-relaxed"
         />
       </div>
-    </AnimatedSection>
+    </motion.section>
   );
 }
 

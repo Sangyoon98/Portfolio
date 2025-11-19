@@ -1,3 +1,7 @@
+"use client";
+
+import { use } from "react";
+import { motion } from "framer-motion";
 import { projects } from "@/data/portfolio";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,9 +10,9 @@ import Image from "next/image";
 import ImageGallery from "@/components/ImageGallery";
 
 interface ProjectPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 const projectSlugMap: { [key: string]: string } = {
@@ -28,7 +32,9 @@ const projectSlugMap: { [key: string]: string } = {
 };
 
 export default function ProjectPage({ params }: ProjectPageProps) {
-  const projectTitle = projectSlugMap[params.slug];
+  // Next.js 15에서 params는 Promise이므로 React.use()로 unwrap
+  const { slug } = use(params);
+  const projectTitle = projectSlugMap[slug];
   const project = projects.find((p) => p.title === projectTitle);
 
   if (!project) {
@@ -56,7 +62,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       <main className="mx-auto max-w-4xl px-6 lg:px-8 py-12">
         {/* Project Image */}
         {project.image && (
-          <div className="mb-8 rounded-lg overflow-hidden border border-black/5 dark:border-white/10 bg-gray-100 dark:bg-gray-800">
+          <motion.div
+            className="mb-8 rounded-lg overflow-hidden border border-black/5 dark:border-white/10 bg-gray-100 dark:bg-gray-800"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="relative w-full aspect-auto">
               <Image
                 src={project.image}
@@ -68,10 +79,15 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 priority
               />
             </div>
-          </div>
+          </motion.div>
         )}
 
-        <div className="mb-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <div className="flex items-center gap-4 mb-4">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
               {project.title}
@@ -92,48 +108,84 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <p className="text-lg text-black/80 dark:text-white/80 mb-8">
             {project.description}
           </p>
-        </div>
+        </motion.div>
 
         {/* Detailed Description */}
         {project.detailedDescription && (
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             <h2 className="text-xl font-semibold mb-4">프로젝트 상세</h2>
             <div className="prose prose-gray dark:prose-invert max-w-none">
               <div className="text-black/70 dark:text-white/70 leading-relaxed">
                 <RichText text={project.detailedDescription} />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Technologies */}
         {project.tech && project.tech.length > 0 && (
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
             <h2 className="text-xl font-semibold mb-4">사용 기술</h2>
-            <div className="flex flex-wrap gap-2">
+            <motion.div
+              className="flex flex-wrap gap-2"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.05,
+                    delayChildren: 0.3,
+                  },
+                },
+              }}
+            >
               {project.tech.map((tech) => (
-                <span
+                <motion.span
                   key={tech}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.8 },
+                    visible: { opacity: 1, scale: 1 },
+                  }}
                   className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 bg-white/70 dark:bg-white/[0.05] px-3 py-1 text-sm font-medium"
                 >
                   {tech}
-                </span>
+                </motion.span>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Additional Images */}
         {project.images && project.images.length > 0 && (
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             <h2 className="text-xl font-semibold mb-4">프로젝트 이미지</h2>
             <ImageGallery images={project.images} title={project.title} />
-          </div>
+          </motion.div>
         )}
 
         {/* Presentation */}
         {project.presentation && (
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
             <h2 className="text-xl font-semibold mb-4">발표자료</h2>
             <a
               href={project.presentation}
@@ -155,16 +207,33 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               </svg>
               발표자료 다운로드 (PDF)
             </a>
-          </div>
+          </motion.div>
         )}
 
         {/* Links */}
         {project.links && project.links.length > 0 && (
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
             <h2 className="text-xl font-semibold mb-4">관련 링크</h2>
-            <div className="flex flex-wrap gap-4">
+            <motion.div
+              className="flex flex-wrap gap-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1,
+                    delayChildren: 0.6,
+                  },
+                },
+              }}
+            >
               {project.links.map((link) => (
-                <a
+                <motion.a
                   key={link.label}
                   href={link.href}
                   target={link.href.startsWith("http") ? "_blank" : undefined}
@@ -174,23 +243,34 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                       : undefined
                   }
                   className="inline-flex items-center rounded-lg bg-black dark:bg-white text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors"
+                  variants={{
+                    hidden: { opacity: 0, x: -10 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {link.label}
-                </a>
+                </motion.a>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Back to Projects */}
-        <div className="pt-8 border-t border-black/5 dark:border-white/10">
+        <motion.div
+          className="pt-8 border-t border-black/5 dark:border-white/10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
           <Link
             href="/#projects"
             className="inline-flex items-center text-base hover:underline underline-offset-4"
           >
             ← 다른 프로젝트 보기
           </Link>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

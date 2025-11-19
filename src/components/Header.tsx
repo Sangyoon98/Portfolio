@@ -1,4 +1,5 @@
 import { profile } from "@/data/portfolio";
+import Link from "next/link";
 
 // 헤더 네비게이션 컴포넌트
 export default function Header() {
@@ -7,6 +8,7 @@ export default function Header() {
     { href: "#skills", label: "스킬" },
     { href: "#projects", label: "프로젝트" },
     { href: "#education", label: "교육·활동" },
+    { href: "/guestbook", label: "방명록", external: true },
     { href: "#contact", label: "연락처" },
   ];
 
@@ -20,12 +22,21 @@ export default function Header() {
           <ul className="hidden sm:flex items-center gap-5 text-base">
             {navItems.map((item) => (
               <li key={item.href}>
-                <a
-                  href={item.href}
-                  className="hover:underline underline-offset-4"
-                >
-                  {item.label}
-                </a>
+                {item.external ? (
+                  <Link
+                    href={item.href}
+                    className="hover:underline underline-offset-4"
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={item.href}
+                    className="hover:underline underline-offset-4"
+                  >
+                    {item.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>

@@ -1,14 +1,23 @@
-import AnimatedSection from "@/components/AnimatedSection";
+"use client";
+
+import { motion } from "framer-motion";
 import SectionTitle from "@/components/SectionTitle";
 import { activities } from "@/data/portfolio";
 
 // 교육 및 활동 섹션 컴포넌트
 export default function EducationSection() {
   return (
-    <AnimatedSection
+    <motion.section
       id="education"
       aria-labelledby="education-title"
-      className="bg-white dark:bg-white/[0.02]"
+      className="bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+      }}
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
         <SectionTitle
@@ -47,7 +56,6 @@ export default function EducationSection() {
           ))}
         </div>
       </div>
-    </AnimatedSection>
+    </motion.section>
   );
 }
-
