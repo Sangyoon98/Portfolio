@@ -1,8 +1,11 @@
+"use client";
+
 import AnimatedSection from "@/components/AnimatedSection";
-import { profile, skills, projects, activities } from "@/data/portfolio";
+import { profile, projects, activities } from "@/data/portfolio";
 import Image from "next/image";
 import Link from "next/link";
 import RichText from "@/components/RichText";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
@@ -183,9 +186,29 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
               {/* Mobile Development */}
-              <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col">
+              <motion.div
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
                 <h3 className="text-lg font-semibold mb-6 text-center">
                   Mobile
                 </h3>
@@ -201,10 +224,18 @@ export default function Home() {
                     className="h-16 object-contain rounded-lg"
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Frontend Development */}
-              <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col">
+              <motion.div
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
                 <h3 className="text-lg font-semibold mb-6 text-center">
                   Frontend
                 </h3>
@@ -225,10 +256,18 @@ export default function Home() {
                     className="h-16 object-contain rounded-lg"
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Backend Development */}
-              <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col">
+              <motion.div
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
                 <h3 className="text-lg font-semibold mb-6 text-center">
                   Backend
                 </h3>
@@ -239,10 +278,18 @@ export default function Home() {
                     className="h-16 object-contain rounded-lg"
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Database */}
-              <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col">
+              <motion.div
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
                 <h3 className="text-lg font-semibold mb-6 text-center">
                   Database
                 </h3>
@@ -253,10 +300,18 @@ export default function Home() {
                     className="h-16 object-contain rounded-lg"
                   />
                 </div>
-              </div>
+              </motion.div>
 
               {/* Tools & Collaboration */}
-              <div className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col">
+              <motion.div
+                className="bg-white/70 dark:bg-white/[0.02] backdrop-blur-sm rounded-xl p-4 border border-black/5 dark:border-white/10 h-80 min-h-80 max-h-80 flex flex-col"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.9 },
+                  visible: { opacity: 1, scale: 1 },
+                }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+              >
                 <h3 className="text-lg font-semibold mb-6 text-center">
                   Tools & Collaboration
                 </h3>
@@ -272,8 +327,8 @@ export default function Home() {
                     className="h-16 object-contain rounded-lg"
                   />
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </AnimatedSection>
 
@@ -293,7 +348,19 @@ export default function Home() {
             <p className="mt-2 text-base text-black/70 dark:text-white/70">
               직접 개발하고 배포한 프로젝트들입니다.
             </p>
-            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            <motion.div
+              className="mt-8 grid gap-6 sm:grid-cols-2"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
               {projects.map((p) => {
                 const slugMap: { [key: string]: string } = {
                   "삼품관리(33Auto)": "33auto",
@@ -313,86 +380,98 @@ export default function Home() {
                 const slug = slugMap[p.title] || "project";
 
                 return (
-                  <Link key={p.title} href={`/projects/${slug}`}>
-                    <article className="h-full flex flex-col rounded-lg border border-black/5 dark:border-white/10 overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg/10 bg-white/70 dark:bg-white/[0.02] cursor-pointer group">
-                      {p.image && (
-                        <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-                          <Image
-                            src={p.image}
-                            alt={p.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            sizes="(max-width: 640px) 100vw, 50vw"
-                          />
-                        </div>
-                      )}
-                      <div className="p-6 flex flex-col flex-grow">
-                        <div className="flex items-start justify-between gap-4 mb-3">
-                          <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {p.title}
-                            {p.featured && (
-                              <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">
-                                Featured
-                              </span>
-                            )}
-                          </h3>
-                          {p.period && (
-                            <span className="text-xs text-black/60 dark:text-white/60 whitespace-nowrap">
-                              {p.period}
-                            </span>
-                          )}
-                        </div>
-                        <div className="mb-3 flex flex-wrap gap-2 text-xs text-black/60 dark:text-white/60">
-                          {p.role && <span>역할: {p.role}</span>}
-                          {p.company && <span>회사: {p.company}</span>}
-                          {p.status && (
-                            <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-300">
-                              {p.status}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-black/70 dark:text-white/70 mb-4 flex-grow">
-                          {p.description}
-                        </p>
-                        {p.tech && (
-                          <div className="mb-4 flex flex-wrap gap-2">
-                            {p.tech.slice(0, 4).map((t) => (
-                              <span
-                                key={t}
-                                className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 bg-white/70 dark:bg-white/[0.05] px-2 py-1 text-xs"
-                              >
-                                {t}
-                              </span>
-                            ))}
-                            {p.tech.length > 4 && (
-                              <span className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 bg-white/70 dark:bg-white/[0.05] px-2 py-1 text-xs text-black/60 dark:text-white/60">
-                                +{p.tech.length - 4} more
-                              </span>
-                            )}
+                  <motion.div
+                    key={p.title}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <Link href={`/projects/${slug}`}>
+                      <motion.article
+                        className="h-full flex flex-col rounded-lg border border-black/5 dark:border-white/10 overflow-hidden bg-white/70 dark:bg-white/[0.02] cursor-pointer group"
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                      >
+                        {p.image && (
+                          <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                            <Image
+                              src={p.image}
+                              alt={p.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 640px) 100vw, 50vw"
+                            />
                           </div>
                         )}
-                        <div className="flex items-center justify-between mt-auto">
-                          <div className="flex flex-wrap gap-3 text-sm">
-                            {p.links &&
-                              p.links.map((l) => (
+                        <div className="p-6 flex flex-col flex-grow">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              {p.title}
+                              {p.featured && (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">
+                                  Featured
+                                </span>
+                              )}
+                            </h3>
+                            {p.period && (
+                              <span className="text-xs text-black/60 dark:text-white/60 whitespace-nowrap">
+                                {p.period}
+                              </span>
+                            )}
+                          </div>
+                          <div className="mb-3 flex flex-wrap gap-2 text-xs text-black/60 dark:text-white/60">
+                            {p.role && <span>역할: {p.role}</span>}
+                            {p.company && <span>회사: {p.company}</span>}
+                            {p.status && (
+                              <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-800 dark:text-green-300">
+                                {p.status}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-black/70 dark:text-white/70 mb-4 flex-grow">
+                            {p.description}
+                          </p>
+                          {p.tech && (
+                            <div className="mb-4 flex flex-wrap gap-2">
+                              {p.tech.slice(0, 4).map((t) => (
                                 <span
-                                  key={`${p.title}-${l.label}`}
-                                  className="text-blue-600 dark:text-blue-400 font-medium"
+                                  key={t}
+                                  className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 bg-white/70 dark:bg-white/[0.05] px-2 py-1 text-xs"
                                 >
-                                  {l.label} →
+                                  {t}
                                 </span>
                               ))}
+                              {p.tech.length > 4 && (
+                                <span className="inline-flex items-center rounded-md border border-black/10 dark:border-white/15 bg-white/70 dark:bg-white/[0.05] px-2 py-1 text-xs text-black/60 dark:text-white/60">
+                                  +{p.tech.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between mt-auto">
+                            <div className="flex flex-wrap gap-3 text-sm">
+                              {p.links &&
+                                p.links.map((l) => (
+                                  <span
+                                    key={`${p.title}-${l.label}`}
+                                    className="text-blue-600 dark:text-blue-400 font-medium"
+                                  >
+                                    {l.label} →
+                                  </span>
+                                ))}
+                            </div>
+                            <span className="text-xs text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
+                              클릭하여 상세보기
+                            </span>
                           </div>
-                          <span className="text-xs text-black/40 dark:text-white/40 group-hover:text-black/60 dark:group-hover:text-white/60 transition-colors">
-                            클릭하여 상세보기
-                          </span>
                         </div>
-                      </div>
-                    </article>
-                  </Link>
+                      </motion.article>
+                    </Link>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </AnimatedSection>
 
@@ -460,11 +539,29 @@ export default function Home() {
               새로운 기회와 협업에 항상 열려있습니다. 언제든 연락 주세요!
             </p>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <motion.div
+              className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
               {profile.contact.email && (
-                <a
+                <motion.a
                   href={`mailto:${profile.contact.email}`}
                   className="flex items-center gap-3 p-4 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-colors"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                 >
                   <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <span className="text-lg">📧</span>
@@ -475,14 +572,20 @@ export default function Home() {
                       {profile.contact.email}
                     </p>
                   </div>
-                </a>
+                </motion.a>
               )}
               {profile.contact.github && (
-                <a
+                <motion.a
                   href={profile.contact.github}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-colors"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                 >
                   <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                     <span className="text-lg">🐙</span>
@@ -497,14 +600,20 @@ export default function Home() {
                       )}
                     </p>
                   </div>
-                </a>
+                </motion.a>
               )}
               {profile.contact.linkedin && (
-                <a
+                <motion.a
                   href={profile.contact.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-colors"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                 >
                   <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <span className="text-lg">💼</span>
@@ -515,14 +624,20 @@ export default function Home() {
                       linkedin.com{new URL(profile.contact.linkedin).pathname}
                     </p>
                   </div>
-                </a>
+                </motion.a>
               )}
               {profile.contact.blog && (
-                <a
+                <motion.a
                   href={profile.contact.blog}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-colors"
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                 >
                   <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                     <span className="text-lg">📝</span>
@@ -533,9 +648,9 @@ export default function Home() {
                       {new URL(profile.contact.blog).host}
                     </p>
                   </div>
-                </a>
+                </motion.a>
               )}
-            </div>
+            </motion.div>
 
             <div className="mt-12 p-8 rounded-2xl border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]">
               <h3 className="text-lg font-semibold mb-4">
