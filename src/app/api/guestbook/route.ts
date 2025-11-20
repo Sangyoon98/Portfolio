@@ -3,6 +3,7 @@ import { kv } from "@vercel/kv";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import bcrypt from "bcryptjs";
 
 // 방명록 데이터 타입
 type GuestbookEntry = {
@@ -10,6 +11,8 @@ type GuestbookEntry = {
   name: string;
   message: string;
   createdAt: string;
+  updatedAt?: string;
+  passwordHash?: string; // 작성자 비밀번호 해시
 };
 
 // Vercel KV 키
@@ -116,11 +119,11 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: 방명록 작성
+// POST: Crew Talk 작성
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, message } = body;
+    const { name, message, password } = body;
 
     // 입력 검증
     if (
@@ -149,66 +152,188 @@ export async function POST(request: Request) {
       );
     }
 
+    // 비밀번호 해시 생성 (선택사항)
+    let passwordHash: string | undefined;
+    if (password && password.trim().length > 0) {
+      if (password.length < 4) {
+        return NextResponse.json(
+          { error: "비밀번호는 4자 이상 입력해주세요." },
+          { status: 400 }
+        );
+      }
+      passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+
     const entries = await readGuestbook();
     const newEntry: GuestbookEntry = {
       id: Date.now().toString(),
       name: name.trim(),
       message: message.trim(),
       createdAt: new Date().toISOString(),
+      passwordHash,
     };
 
     entries.push(newEntry);
     await writeGuestbook(entries);
 
-    return NextResponse.json({ success: true, entry: newEntry });
+    // 응답 시 비밀번호 해시 제외
+    const entryResponse = {
+      id: newEntry.id,
+      name: newEntry.name,
+      message: newEntry.message,
+      createdAt: newEntry.createdAt,
+    };
+    return NextResponse.json({ success: true, entry: entryResponse });
   } catch (error) {
     console.error("Error writing guestbook:", error);
     const errorMessage =
-      error instanceof Error ? error.message : "방명록 작성에 실패했습니다.";
+      error instanceof Error ? error.message : "작성에 실패했습니다.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
-// DELETE: 방명록 삭제 (인증 필요)
-export async function DELETE(request: Request) {
+// PUT: Crew Talk 수정
+export async function PUT(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    const password = searchParams.get("password");
+    const body = await request.json();
+    const { id, message, password } = body;
 
-    if (!id) {
+    if (!id || !message) {
       return NextResponse.json(
-        { error: "삭제할 방명록 ID가 필요합니다." },
+        { error: "ID와 메시지가 필요합니다." },
         { status: 400 }
       );
     }
 
+    if (message.trim().length === 0) {
+      return NextResponse.json(
+        { error: "메시지를 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (message.length > 500) {
+      return NextResponse.json(
+        { error: "메시지는 500자 이하로 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "비밀번호를 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    const entries = await readGuestbook();
+    const entryIndex = entries.findIndex((entry) => entry.id === id);
+
+    if (entryIndex === -1) {
+      return NextResponse.json(
+        { error: "해당 항목을 찾을 수 없습니다." },
+        { status: 404 }
+      );
+    }
+
+    const entry = entries[entryIndex];
+
     // 비밀번호 확인
+    if (entry.passwordHash) {
+      const isValid = await bcrypt.compare(password, entry.passwordHash);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: "비밀번호가 올바르지 않습니다." },
+          { status: 401 }
+        );
+      }
+    } else {
+      return NextResponse.json(
+        { error: "이 항목은 수정할 수 없습니다." },
+        { status: 403 }
+      );
+    }
+
+    // 메시지 업데이트
+    entries[entryIndex] = {
+      ...entry,
+      message: message.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await writeGuestbook(entries);
+
+    const updatedEntry = {
+      id: entries[entryIndex].id,
+      name: entries[entryIndex].name,
+      message: entries[entryIndex].message,
+      createdAt: entries[entryIndex].createdAt,
+      updatedAt: entries[entryIndex].updatedAt,
+    };
+    return NextResponse.json({ success: true, entry: updatedEntry });
+  } catch (error) {
+    console.error("Error updating guestbook:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "수정에 실패했습니다.";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
+}
+
+// DELETE: Crew Talk 삭제 (작성자 또는 관리자)
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { id, password } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "삭제할 항목 ID가 필요합니다." },
+        { status: 400 }
+      );
+    }
+
+    if (!password) {
+      return NextResponse.json(
+        { error: "비밀번호를 입력해주세요." },
+        { status: 400 }
+      );
+    }
+
+    const entries = await readGuestbook();
+    const entry = entries.find((e) => e.id === id);
+
+    if (!entry) {
+      return NextResponse.json(
+        { error: "해당 항목을 찾을 수 없습니다." },
+        { status: 404 }
+      );
+    }
+
+    // 관리자 비밀번호 확인
     const adminPassword = process.env.GUESTBOOK_ADMIN_PASSWORD || "admin123";
-    if (!password || password !== adminPassword) {
+    const isAdmin = password === adminPassword;
+
+    // 작성자 비밀번호 확인
+    let isAuthor = false;
+    if (entry.passwordHash) {
+      isAuthor = await bcrypt.compare(password, entry.passwordHash);
+    }
+
+    if (!isAdmin && !isAuthor) {
       return NextResponse.json(
         { error: "비밀번호가 올바르지 않습니다." },
         { status: 401 }
       );
     }
 
-    const entries = await readGuestbook();
     const filteredEntries = entries.filter((entry) => entry.id !== id);
-
-    if (entries.length === filteredEntries.length) {
-      return NextResponse.json(
-        { error: "해당 방명록을 찾을 수 없습니다." },
-        { status: 404 }
-      );
-    }
-
     await writeGuestbook(filteredEntries);
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting guestbook:", error);
     const errorMessage =
-      error instanceof Error ? error.message : "방명록 삭제에 실패했습니다.";
+      error instanceof Error ? error.message : "삭제에 실패했습니다.";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

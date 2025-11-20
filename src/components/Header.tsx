@@ -15,7 +15,7 @@ export default function Header() {
     { href: "#projects", label: "프로젝트" },
     { href: "#education", label: "교육·활동" },
     { href: "#contact", label: "연락처" },
-    { href: "/guestbook", label: "방명록", external: true },
+    { href: "/guestbook", label: "Crew Talk", external: true },
   ];
 
   const handleNavClick = () => {

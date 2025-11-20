@@ -5,15 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { profile } from "@/data/portfolio";
 
-// 방명록 항목 타입
+// Crew Talk 항목 타입
 type GuestbookEntry = {
   id: string;
   name: string;
   message: string;
   createdAt: string;
+  updatedAt?: string;
 };
 
-// 방명록 페이지 컴포넌트
+// Crew Talk 페이지 컴포넌트
 export default function GuestbookPage() {
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,12 +27,16 @@ export default function GuestbookPage() {
   const itemsPerPage = 10;
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [password, setPassword] = useState("");
-  const [targetDeleteId, setTargetDeleteId] = useState<string | null>(null);
+  const [modalPassword, setModalPassword] = useState("");
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const [modalType, setModalType] = useState<"delete" | "edit">("delete");
+  const [editMessage, setEditMessage] = useState("");
   const observerTarget = useRef<HTMLDivElement>(null);
 
   // 방명록 목록 가져오기
@@ -113,7 +118,7 @@ export default function GuestbookPage() {
     fetchEntries(true);
   }, []);
 
-  // 방명록 작성
+  // Crew Talk 작성
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -126,19 +131,20 @@ export default function GuestbookPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, message }),
+        body: JSON.stringify({ name, message, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "방명록 작성에 실패했습니다.");
+        setError(data.error || "작성에 실패했습니다.");
         return;
       }
 
       setSuccess(true);
       setName("");
       setMessage("");
+      setPassword("");
       // 목록 새로고침
       setOffset(0);
       setCurrentPage(1);
@@ -147,56 +153,107 @@ export default function GuestbookPage() {
       // 3초 후 성공 메시지 제거
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
-      setError("방명록 작성에 실패했습니다.");
+      setError("작성에 실패했습니다.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // 방명록 삭제 버튼 클릭
+  // 삭제 버튼 클릭
   const handleDeleteClick = (id: string) => {
-    setTargetDeleteId(id);
+    setTargetId(id);
+    setModalType("delete");
     setShowPasswordModal(true);
-    setPassword("");
+    setModalPassword("");
     setError("");
   };
 
-  // 비밀번호 확인 후 삭제
-  const handleDeleteConfirm = async () => {
-    if (!targetDeleteId || !password) {
+  // 수정 버튼 클릭
+  const handleEditClick = (entry: GuestbookEntry) => {
+    setTargetId(entry.id);
+    setEditMessage(entry.message);
+    setModalType("edit");
+    setShowPasswordModal(true);
+    setModalPassword("");
+    setError("");
+  };
+
+  // 비밀번호 확인 후 삭제/수정
+  const handlePasswordConfirm = async () => {
+    if (!targetId || !modalPassword) {
       setError("비밀번호를 입력해주세요.");
       return;
     }
 
-    setDeletingId(targetDeleteId);
+    if (modalType === "edit" && !editMessage.trim()) {
+      setError("메시지를 입력해주세요.");
+      return;
+    }
+
+    if (modalType === "edit" && editMessage.length > 500) {
+      setError("메시지는 500자 이하로 입력해주세요.");
+      return;
+    }
+
+    setDeletingId(modalType === "delete" ? targetId : null);
+    setEditingId(modalType === "edit" ? targetId : null);
     setError("");
+
     try {
-      const response = await fetch(
-        `/api/guestbook?id=${targetDeleteId}&password=${encodeURIComponent(password)}`,
-        {
+      if (modalType === "delete") {
+        const response = await fetch("/api/guestbook", {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: targetId,
+            password: modalPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || "삭제에 실패했습니다.");
+          setDeletingId(null);
+          return;
         }
-      );
+      } else {
+        const response = await fetch("/api/guestbook", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: targetId,
+            message: editMessage.trim(),
+            password: modalPassword,
+          }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!response.ok) {
-        setError(data.error || "방명록 삭제에 실패했습니다.");
-        setDeletingId(null);
-        return;
+        if (!response.ok) {
+          setError(data.error || "수정에 실패했습니다.");
+          setEditingId(null);
+          return;
+        }
       }
 
       // 성공 시 모달 닫기 및 목록 새로고침
       setShowPasswordModal(false);
-      setPassword("");
-      setTargetDeleteId(null);
+      setModalPassword("");
+      setEditMessage("");
+      setTargetId(null);
       setOffset(0);
       setCurrentPage(1);
       await fetchEntries(true);
     } catch (error) {
-      setError("방명록 삭제에 실패했습니다.");
+      setError(modalType === "delete" ? "삭제에 실패했습니다." : "수정에 실패했습니다.");
     } finally {
       setDeletingId(null);
+      setEditingId(null);
     }
   };
 
@@ -241,13 +298,13 @@ export default function GuestbookPage() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4">
-            Guestbook
+            Crew Talk
           </h1>
           <p className="text-lg text-black/70 dark:text-white/70 mb-12">
-            방문해주셔서 감사합니다. 간단한 인사말을 남겨주세요!
+            함께 일한 경험이 있으시다면 한마디 남겨주세요!
           </p>
 
-          {/* 방명록 작성 폼 */}
+          {/* Crew Talk 작성 폼 */}
           <motion.div
             className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]"
             initial={{ opacity: 0, y: 20 }}
@@ -294,6 +351,26 @@ export default function GuestbookPage() {
                   {message.length}/500
                 </div>
               </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                >
+                  비밀번호 (선택사항)
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={4}
+                  className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
+                  placeholder="나중에 수정/삭제할 때 사용할 비밀번호 (4자 이상)"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  비밀번호를 설정하면 나중에 본인의 글을 수정하거나 삭제할 수 있습니다.
+                </p>
+              </div>
               {error && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -309,7 +386,7 @@ export default function GuestbookPage() {
                   animate={{ opacity: 1 }}
                   className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm"
                 >
-                  방명록이 작성되었습니다!
+                  작성되었습니다!
                 </motion.div>
               )}
               <button
@@ -317,27 +394,27 @@ export default function GuestbookPage() {
                 disabled={submitting}
                 className="w-full px-6 py-3 rounded-lg bg-purple-600 dark:bg-purple-500 text-white font-medium hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? "작성 중..." : "방명록 남기기"}
+                {submitting ? "작성 중..." : "작성하기"}
               </button>
             </form>
           </motion.div>
 
-          {/* 방명록 목록 */}
+          {/* Crew Talk 목록 */}
           {loading ? (
             <div className="text-center py-12">
               <p className="text-gray-600 dark:text-gray-400">
-                방명록을 불러오는 중...
+                불러오는 중...
               </p>
             </div>
           ) : entries.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600 dark:text-gray-400">
-                아직 방명록이 없습니다. 첫 번째 방명록을 남겨주세요!
+                아직 작성된 글이 없습니다. 첫 번째 글을 남겨주세요!
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold mb-6">방명록 목록</h2>
+              <h2 className="text-2xl font-semibold mb-6">Crew Talk</h2>
               <AnimatePresence>
                 {entries.map((entry, index) => (
                   <motion.div
@@ -354,16 +431,29 @@ export default function GuestbookPage() {
                       </h3>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {formatDate(entry.createdAt)}
+                          {formatDate(entry.updatedAt || entry.createdAt)}
+                          {entry.updatedAt && (
+                            <span className="ml-1 text-gray-400">(수정됨)</span>
+                          )}
                         </span>
-                        <button
-                          onClick={() => handleDeleteClick(entry.id)}
-                          disabled={deletingId === entry.id}
-                          className="hidden group-hover:block px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
-                          title="삭제"
-                        >
-                          {deletingId === entry.id ? "삭제 중..." : "삭제"}
-                        </button>
+                        <div className="hidden group-hover:flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditClick(entry)}
+                            disabled={editingId === entry.id}
+                            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-all"
+                            title="수정"
+                          >
+                            {editingId === entry.id ? "수정 중..." : "수정"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(entry.id)}
+                            disabled={deletingId === entry.id}
+                            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
+                            title="삭제"
+                          >
+                            {deletingId === entry.id ? "삭제 중..." : "삭제"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
@@ -466,27 +556,52 @@ export default function GuestbookPage() {
             className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
           >
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
-              방명록 삭제
+              {modalType === "delete" ? "삭제" : "수정"}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              방명록을 삭제하려면 관리자 비밀번호를 입력해주세요.
+              {modalType === "delete"
+                ? "작성 시 설정한 비밀번호 또는 관리자 비밀번호를 입력해주세요."
+                : "작성 시 설정한 비밀번호를 입력해주세요."}
             </p>
             <div className="space-y-4">
+              {modalType === "edit" && (
+                <div>
+                  <label
+                    htmlFor="edit-message"
+                    className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+                  >
+                    메시지
+                  </label>
+                  <textarea
+                    id="edit-message"
+                    value={editMessage}
+                    onChange={(e) => setEditMessage(e.target.value)}
+                    maxLength={500}
+                    required
+                    rows={4}
+                    className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 resize-none"
+                    placeholder="메시지를 입력해주세요 (최대 500자)"
+                  />
+                  <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {editMessage.length}/500
+                  </div>
+                </div>
+              )}
               <div>
                 <label
-                  htmlFor="delete-password"
+                  htmlFor="modal-password"
                   className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
                 >
                   비밀번호
                 </label>
                 <input
                   type="password"
-                  id="delete-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  id="modal-password"
+                  value={modalPassword}
+                  onChange={(e) => setModalPassword(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleDeleteConfirm();
+                    if (e.key === "Enter" && modalType === "delete") {
+                      handlePasswordConfirm();
                     }
                   }}
                   className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
@@ -507,8 +622,9 @@ export default function GuestbookPage() {
                 <button
                   onClick={() => {
                     setShowPasswordModal(false);
-                    setPassword("");
-                    setTargetDeleteId(null);
+                    setModalPassword("");
+                    setEditMessage("");
+                    setTargetId(null);
                     setError("");
                   }}
                   className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors"
@@ -516,11 +632,26 @@ export default function GuestbookPage() {
                   취소
                 </button>
                 <button
-                  onClick={handleDeleteConfirm}
-                  disabled={!password || deletingId !== null}
-                  className="px-4 py-2 rounded-lg bg-red-600 dark:bg-red-500 text-white font-medium hover:bg-red-700 dark:hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handlePasswordConfirm}
+                  disabled={
+                    !modalPassword ||
+                    (modalType === "edit" && !editMessage.trim()) ||
+                    deletingId !== null ||
+                    editingId !== null
+                  }
+                  className={`px-4 py-2 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    modalType === "delete"
+                      ? "bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600"
+                      : "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600"
+                  }`}
                 >
-                  {deletingId ? "삭제 중..." : "삭제"}
+                  {modalType === "delete"
+                    ? deletingId
+                      ? "삭제 중..."
+                      : "삭제"
+                    : editingId
+                    ? "수정 중..."
+                    : "수정"}
                 </button>
               </div>
             </div>
