@@ -257,6 +257,31 @@ export default function GuestbookPage() {
     }
   };
 
+  // 이름 마스킹 함수 (개인정보 보호)
+  const maskName = (name: string): string => {
+    if (!name || name.length === 0) return name;
+    
+    const nameLength = name.length;
+    
+    // 2글자: 첫 글자만 보이게 (예: "김*")
+    if (nameLength === 2) {
+      return name[0] + "*";
+    }
+    
+    // 3글자: 첫 글자와 마지막 글자만 보이게 (예: "김*수")
+    if (nameLength === 3) {
+      return name[0] + "*" + name[2];
+    }
+    
+    // 4글자 이상: 첫 글자와 마지막 글자만 보이게 (예: "김*수", "이*영")
+    if (nameLength >= 4) {
+      return name[0] + "*".repeat(nameLength - 2) + name[nameLength - 1];
+    }
+    
+    // 1글자: 그대로 표시
+    return name;
+  };
+
   // 날짜 포맷팅
   const formatDate = (dateString: string) => {
     try {
@@ -427,7 +452,7 @@ export default function GuestbookPage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        {entry.name}
+                        {maskName(entry.name)}
                       </h3>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">

@@ -12,6 +12,31 @@ type CrewTalkEntry = {
   createdAt: string;
 };
 
+// 이름 마스킹 함수 (개인정보 보호)
+function maskName(name: string): string {
+  if (!name || name.length === 0) return name;
+  
+  const nameLength = name.length;
+  
+  // 2글자: 첫 글자만 보이게 (예: "김*")
+  if (nameLength === 2) {
+    return name[0] + "*";
+  }
+  
+  // 3글자: 첫 글자와 마지막 글자만 보이게 (예: "김*수")
+  if (nameLength === 3) {
+    return name[0] + "*" + name[2];
+  }
+  
+  // 4글자 이상: 첫 글자와 마지막 글자만 보이게 (예: "김*수", "이*영")
+  if (nameLength >= 4) {
+    return name[0] + "*".repeat(nameLength - 2) + name[nameLength - 1];
+  }
+  
+  // 1글자: 그대로 표시
+  return name;
+}
+
 // 말풍선 컴포넌트
 function SpeechBubble({ entry, position }: { entry: CrewTalkEntry; position: { top: number; left: number; rotate: number } }) {
   return (
@@ -53,7 +78,7 @@ function SpeechBubble({ entry, position }: { entry: CrewTalkEntry; position: { t
           <div className="relative">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {entry.name}
+                {maskName(entry.name)}
               </span>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 leading-relaxed">
@@ -159,7 +184,7 @@ export default function CrewTalkSection() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  {entry.name}
+                  {maskName(entry.name)}
                 </span>
               </div>
               <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">

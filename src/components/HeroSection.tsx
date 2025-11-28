@@ -31,11 +31,11 @@ export default function HeroSection() {
           {/* 다크 모드용 배경 */}
           <div
             className="hidden dark:block absolute inset-0 rounded-full opacity-40"
-            style={{
-              background:
-                "radial-gradient(circle at center, rgba(99,102,241,0.35), transparent 60%), radial-gradient(circle at 70% 30%, rgba(16,185,129,0.35), transparent 55%), radial-gradient(circle at 30% 70%, rgba(244,114,182,0.35), transparent 55%)",
-            }}
-          />
+          style={{
+            background:
+              "radial-gradient(circle at center, rgba(99,102,241,0.35), transparent 60%), radial-gradient(circle at 70% 30%, rgba(16,185,129,0.35), transparent 55%), radial-gradient(circle at 30% 70%, rgba(244,114,182,0.35), transparent 55%)",
+          }}
+        />
         </div>
       </div>
 
