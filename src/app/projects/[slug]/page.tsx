@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { projects } from "@/data/portfolio";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import RichText from "@/components/RichText";
 import Image from "next/image";
 import ImageGallery from "@/components/ImageGallery";
+import ReactMarkdown from "react-markdown";
 
 interface ProjectPageProps {
   params: Promise<{
@@ -39,15 +39,73 @@ function getRoleTags(role?: string): string[] {
 
   if (roleLower.includes("android")) tags.push("Android");
   if (roleLower.includes("ios")) tags.push("iOS");
-  if (roleLower.includes("frontend") || roleLower.includes("fe")) tags.push("FE");
-  if (roleLower.includes("backend") || roleLower.includes("be")) tags.push("BE");
-  if (roleLower.includes("fullstack") || roleLower.includes("full stack")) tags.push("Fullstack");
+  if (roleLower.includes("frontend") || roleLower.includes("fe"))
+    tags.push("FE");
+  if (roleLower.includes("backend") || roleLower.includes("be"))
+    tags.push("BE");
+  if (roleLower.includes("fullstack") || roleLower.includes("full stack"))
+    tags.push("Fullstack");
 
   return tags;
 }
 
+// 섹션 컴포넌트
+function Section({
+  title,
+  children,
+  delay = 0,
+}: {
+  title: string;
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      className="mb-10"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
+    >
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
+        {title}
+      </h2>
+      {children}
+    </motion.div>
+  );
+}
+
+// 리스트 아이템 컴포넌트
+function ListItem({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3 py-2">
+      <span className="mt-2 w-1.5 h-1.5 bg-purple-400 rounded-full flex-shrink-0"></span>
+      <span className="text-black/70 dark:text-white/70 leading-relaxed">
+        {children}
+      </span>
+    </li>
+  );
+}
+
+// Markdown 렌더링 컴포넌트
+function MarkdownText({ text }: { text: string }) {
+  return (
+    <ReactMarkdown
+      components={{
+        strong: ({ children }) => (
+          <strong className="font-semibold text-black dark:text-white">
+            {children}
+          </strong>
+        ),
+        p: ({ children }) => <span>{children}</span>,
+      }}
+    >
+      {text}
+    </ReactMarkdown>
+  );
+}
+
 export default function ProjectPage({ params }: ProjectPageProps) {
-  // Next.js 15에서 params는 Promise이므로 React.use()로 unwrap
   const { slug } = use(params);
   const projectTitle = projectSlugMap[slug];
   const project = projects.find((p) => p.title === projectTitle);
@@ -55,6 +113,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   if (!project) {
     notFound();
   }
+
+  let sectionDelay = 0.1;
+  const getNextDelay = () => {
+    sectionDelay += 0.1;
+    return sectionDelay;
+  };
 
   return (
     <div className="bg-white dark:bg-white/[0.02]">
@@ -97,6 +161,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           </motion.div>
         )}
 
+        {/* Title & Meta */}
         <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 20 }}
@@ -116,44 +181,112 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 {tag}
               </span>
             ))}
+            {project.status && (
+              <span className="inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-3 py-1 text-sm font-medium text-green-800 dark:text-green-300">
+                {project.status}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm text-black/60 dark:text-white/60 mb-6">
-            {project.period && <span>기간: {project.period}</span>}
-            {project.company && <span>회사: {project.company}</span>}
+            {project.period && <span>📅 {project.period}</span>}
+            {project.company && <span>🏢 {project.company}</span>}
+            {project.role && <span>👤 {project.role}</span>}
           </div>
 
-          <p className="text-lg text-black/80 dark:text-white/80 mb-8">
+          <p className="text-lg text-black/80 dark:text-white/80">
             {project.description}
           </p>
         </motion.div>
 
-        {/* Detailed Description */}
-        {project.detailedDescription && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <h2 className="text-xl font-semibold mb-4">프로젝트 상세</h2>
-            <div className="prose prose-gray dark:prose-invert max-w-none">
-              <div className="text-black/70 dark:text-white/70 leading-relaxed">
-                <RichText text={project.detailedDescription} />
-              </div>
+        {/* 프로젝트 개요 */}
+        {project.overview && (
+          <Section title="프로젝트 개요" delay={getNextDelay()}>
+            <div className="bg-gray-50 dark:bg-white/[0.03] rounded-lg p-5 border border-black/5 dark:border-white/10">
+              <p className="text-black/70 dark:text-white/70 leading-relaxed">
+                {project.overview}
+              </p>
             </div>
-          </motion.div>
+          </Section>
         )}
 
-        {/* Technologies */}
+        {/* 담당 업무/기여 */}
+        {project.responsibilities && project.responsibilities.length > 0 && (
+          <Section title="담당 업무/기여" delay={getNextDelay()}>
+            <ul className="space-y-1">
+              {project.responsibilities.map((item, idx) => (
+                <ListItem key={idx}>
+                  <MarkdownText text={item} />
+                </ListItem>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* 사용 기술 */}
+        {project.techStack && project.techStack.length > 0 && (
+          <Section title="사용 기술" delay={getNextDelay()}>
+            <ul className="space-y-1">
+              {project.techStack.map((item, idx) => (
+                <ListItem key={idx}>
+                  <MarkdownText text={item} />
+                </ListItem>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* 주요 기능 */}
+        {project.features && project.features.length > 0 && (
+          <Section title="주요 기능" delay={getNextDelay()}>
+            <ul className="space-y-1">
+              {project.features.map((item, idx) => (
+                <ListItem key={idx}>
+                  <MarkdownText text={item} />
+                </ListItem>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* 성과/수상/개선 */}
+        {project.achievements && project.achievements.length > 0 && (
+          <Section title="성과/수상/개선" delay={getNextDelay()}>
+            <ul className="space-y-1">
+              {project.achievements.map((item, idx) => (
+                <ListItem key={idx}>
+                  <MarkdownText text={item} />
+                </ListItem>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* 팀 구성 */}
+        {project.team && (
+          <Section title="팀 구성" delay={getNextDelay()}>
+            <div className="bg-gray-50 dark:bg-white/[0.03] rounded-lg p-5 border border-black/5 dark:border-white/10">
+              <p className="text-black/70 dark:text-white/70">{project.team}</p>
+            </div>
+          </Section>
+        )}
+
+        {/* 개발 경험 */}
+        {project.experience && project.experience.length > 0 && (
+          <Section title="개발 경험" delay={getNextDelay()}>
+            <ul className="space-y-1">
+              {project.experience.map((item, idx) => (
+                <ListItem key={idx}>
+                  <MarkdownText text={item} />
+                </ListItem>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {/* 기술 태그 */}
         {project.tech && project.tech.length > 0 && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <h2 className="text-xl font-semibold mb-4">사용 기술</h2>
+          <Section title="기술 스택" delay={getNextDelay()}>
             <motion.div
               className="flex flex-wrap gap-2"
               initial="hidden"
@@ -161,8 +294,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               variants={{
                 visible: {
                   transition: {
-                    staggerChildren: 0.05,
-                    delayChildren: 0.3,
+                    staggerChildren: 0.03,
                   },
                 },
               }}
@@ -180,31 +312,19 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 </motion.span>
               ))}
             </motion.div>
-          </motion.div>
+          </Section>
         )}
 
-        {/* Additional Images */}
+        {/* 프로젝트 이미지 */}
         {project.images && project.images.length > 0 && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <h2 className="text-xl font-semibold mb-4">프로젝트 이미지</h2>
+          <Section title="프로젝트 이미지" delay={getNextDelay()}>
             <ImageGallery images={project.images} title={project.title} />
-          </motion.div>
+          </Section>
         )}
 
-        {/* Presentation */}
+        {/* 발표자료 */}
         {project.presentation && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            <h2 className="text-xl font-semibold mb-4">발표자료</h2>
+          <Section title="발표자료" delay={getNextDelay()}>
             <a
               href={project.presentation}
               download
@@ -225,18 +345,12 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               </svg>
               발표자료 다운로드 (PDF)
             </a>
-          </motion.div>
+          </Section>
         )}
 
-        {/* Links */}
+        {/* 관련 링크 */}
         {project.links && project.links.length > 0 && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <h2 className="text-xl font-semibold mb-4">관련 링크</h2>
+          <Section title="관련 링크" delay={getNextDelay()}>
             <motion.div
               className="flex flex-wrap gap-3"
               initial="hidden"
@@ -245,7 +359,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                 visible: {
                   transition: {
                     staggerChildren: 0.1,
-                    delayChildren: 0.6,
                   },
                 },
               }}
@@ -260,7 +373,9 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                     <motion.a
                       key={link.label}
                       href={link.href}
-                      target={link.href.startsWith("http") ? "_blank" : undefined}
+                      target={
+                        link.href.startsWith("http") ? "_blank" : undefined
+                      }
                       rel={
                         link.href.startsWith("http")
                           ? "noopener noreferrer"
@@ -270,8 +385,8 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                         isGithub
                           ? "bg-gray-900 dark:bg-gray-800 text-white hover:bg-gray-800 dark:hover:bg-gray-700"
                           : isPlayStore
-                          ? "bg-green-600 dark:bg-green-700 text-white hover:bg-green-700 dark:hover:bg-green-600"
-                          : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
+                            ? "bg-green-600 dark:bg-green-700 text-white hover:bg-green-700 dark:hover:bg-green-600"
+                            : "bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600"
                       }`}
                       variants={{
                         hidden: { opacity: 0, x: -10 },
@@ -309,7 +424,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                   );
                 })}
             </motion.div>
-          </motion.div>
+          </Section>
         )}
 
         {/* Back to Projects */}
@@ -317,7 +432,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           className="pt-8 border-t border-black/5 dark:border-white/10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ duration: 0.5, delay: sectionDelay + 0.1 }}
         >
           <Link
             href="/#projects"
