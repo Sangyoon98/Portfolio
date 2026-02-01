@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { profile } from "@/data/portfolio";
 
@@ -302,7 +301,7 @@ export default function GuestbookPage() {
     <div className="bg-white dark:bg-white/[0.02]">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-black/5 dark:border-white/10">
-        <nav className="mx-auto max-w-7xl px-6 lg:px-8 h-16 flex items-center justify-between">
+        <nav className="mx-auto max-w-4xl px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="text-base font-semibold tracking-tight">
             {profile.name}
           </Link>
@@ -317,11 +316,7 @@ export default function GuestbookPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-4xl px-6 lg:px-8 py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
+        <div>
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4">
             Crew Talk
           </h1>
@@ -330,12 +325,7 @@ export default function GuestbookPage() {
           </p>
 
           {/* Crew Talk 작성 폼 */}
-          <motion.div
-            className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          <div className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
@@ -397,22 +387,14 @@ export default function GuestbookPage() {
                 </p>
               </div>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
-                >
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
                   {error}
-                </motion.div>
+                </div>
               )}
               {success && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm"
-                >
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm">
                   작성되었습니다!
-                </motion.div>
+                </div>
               )}
               <button
                 type="submit"
@@ -422,7 +404,7 @@ export default function GuestbookPage() {
                 {submitting ? "작성 중..." : "작성하기"}
               </button>
             </form>
-          </motion.div>
+          </div>
 
           {/* Crew Talk 목록 */}
           {loading ? (
@@ -440,53 +422,47 @@ export default function GuestbookPage() {
           ) : (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold mb-6">Crew Talk</h2>
-              <AnimatePresence>
-                {entries.map((entry, index) => (
-                  <motion.div
-                    key={entry.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-all relative group"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        {maskName(entry.name)}
-                      </h3>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                          {formatDate(entry.updatedAt || entry.createdAt)}
-                          {entry.updatedAt && (
-                            <span className="ml-1 text-gray-400">(수정됨)</span>
-                          )}
-                        </span>
-                        <div className="hidden group-hover:flex items-center gap-2">
-                          <button
-                            onClick={() => handleEditClick(entry)}
-                            disabled={editingId === entry.id}
-                            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-all"
-                            title="수정"
-                          >
-                            {editingId === entry.id ? "수정 중..." : "수정"}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteClick(entry.id)}
-                            disabled={deletingId === entry.id}
-                            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
-                            title="삭제"
-                          >
-                            {deletingId === entry.id ? "삭제 중..." : "삭제"}
-                          </button>
-                        </div>
+              {entries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-all relative group"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                      {maskName(entry.name)}
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {formatDate(entry.updatedAt || entry.createdAt)}
+                        {entry.updatedAt && (
+                          <span className="ml-1 text-gray-400">(수정됨)</span>
+                        )}
+                      </span>
+                      <div className="hidden group-hover:flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditClick(entry)}
+                          disabled={editingId === entry.id}
+                          className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-all"
+                          title="수정"
+                        >
+                          {editingId === entry.id ? "수정 중..." : "수정"}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(entry.id)}
+                          disabled={deletingId === entry.id}
+                          className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
+                          title="삭제"
+                        >
+                          {deletingId === entry.id ? "삭제 중..." : "삭제"}
+                        </button>
                       </div>
                     </div>
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                      {entry.message}
-                    </p>
-                  </motion.div>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {entry.message}
+                  </p>
+                </div>
               ))}
-            </AnimatePresence>
 
             {/* 무한 스크롤 트리거 (모바일) */}
             {hasMore && (
@@ -568,18 +544,13 @@ export default function GuestbookPage() {
             )}
           </div>
         )}
-      </motion.div>
+      </div>
       </main>
 
       {/* 비밀번호 확인 모달 */}
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
-          >
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
               {modalType === "delete" ? "삭제" : "수정"}
             </h3>
@@ -635,13 +606,9 @@ export default function GuestbookPage() {
                 />
               </div>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
-                >
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
                   {error}
-                </motion.div>
+                </div>
               )}
               <div className="flex gap-3 justify-end">
                 <button
@@ -680,7 +647,7 @@ export default function GuestbookPage() {
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

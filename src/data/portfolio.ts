@@ -52,6 +52,7 @@ export type Activity = {
   org?: string;
   period?: string;
   description?: string;
+  highlights?: string[];
 };
 
 export type Career = {
@@ -217,17 +218,17 @@ export const education: Education[] = [
 
 export const awards: Award[] = [
   {
-    competition: "강남대학교 공과대학 소프트웨어응용학부 졸업작품전시회",
-    prize: "최우수상",
-    date: "2022년 12월 6일",
-    organization: "강남대학교",
-  },
-  {
     competition:
       "2023 서울 열린데이터광장 공공데이터 활용 모바일 앱/웹 경진대회",
     prize: "장려상",
     date: "2023년 6월 30일",
     organization: "서울특별시",
+  },
+  {
+    competition: "강남대학교 공과대학 소프트웨어응용학부 졸업작품전시회",
+    prize: "최우수상",
+    date: "2022년 12월 6일",
+    organization: "강남대학교",
   },
   {
     competition: "제 21회 정보기술 및 응용 학술제",
@@ -1054,7 +1055,13 @@ export const activities: Activity[] = [
     org: "현대오토에버",
     period: "2025.04. ~ 2025.11",
     description:
-      "웹/앱 풀스택 과정에서 Android 중심으로 FE/BE/iOS까지 전 주기 개발 흐름을 경험했습니다. 팀 프로젝트 4개를 수행하며 API 연동, 데이터 흐름, 화면 상태 관리, 협업 방식(명세/이슈/PR)을 실제처럼 운영했습니다. 타보니까: 리뷰 목록·필터·댓글 기능을 FE/BE로 구현, QueryDSL로 복합 필터 성능 개선. 인사이드무비: FE 리드로 로그인/회원/리뷰 UI 전반 구현, BE 연동 및 데이터 흐름 정리. Trever: iOS 리드로 Google OAuth, 거래/경매/계약서/찜하기 구현, RTDB 기반 데이터 동기화 경험. 삼품관리(ERP): Android·iOS 앱 구현, Clean Architecture + MVVM 기반 구조 설계 및 기능 개발.",
+      "웹/앱 풀스택 과정에서 Android 중심으로 FE/BE/iOS까지 전 주기 개발 흐름을 경험했습니다. 팀 프로젝트 4개를 수행하며 API 연동, 데이터 흐름, 화면 상태 관리, 협업 방식(명세/이슈/PR)을 실제처럼 운영했습니다.",
+    highlights: [
+      "타보니까: 리뷰 목록·필터·댓글 기능을 FE/BE로 구현, QueryDSL로 복합 필터 성능 개선",
+      "인사이드무비: FE 리드로 로그인/회원/리뷰 UI 전반 구현, BE 연동 및 데이터 흐름 정리",
+      "Trever: iOS 리드로 Google OAuth, 거래/경매/계약서/찜하기 구현, RTDB 기반 데이터 동기화 경험",
+      "삼품관리(ERP): Android·iOS 앱 구현, Clean Architecture + MVVM 기반 구조 설계 및 기능 개발",
+    ],
   },
   {
     title: "강남대학교 모바일프로그래밍 멘토링 프로그램",

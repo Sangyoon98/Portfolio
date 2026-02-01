@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import SectionTitle from "@/components/SectionTitle";
 
 // 방명록 항목 타입
@@ -94,17 +93,10 @@ export default function GuestbookSection() {
   };
 
   return (
-    <motion.section
+    <section
       id="guestbook"
       aria-labelledby="guestbook-title"
       className="bg-white dark:bg-white/[0.02] min-h-screen scroll-mt-14"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      }}
     >
       <div className="mx-auto max-w-4xl px-6 lg:px-8 py-24">
         <SectionTitle
@@ -115,13 +107,7 @@ export default function GuestbookSection() {
         />
 
         {/* 방명록 작성 폼 */}
-        <motion.div
-          className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <div className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
@@ -163,22 +149,14 @@ export default function GuestbookSection() {
               </div>
             </div>
             {error && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
-              >
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
                 {error}
-              </motion.div>
+              </div>
             )}
             {success && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm"
-              >
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm">
                 방명록이 작성되었습니다!
-              </motion.div>
+              </div>
             )}
             <button
               type="submit"
@@ -188,7 +166,7 @@ export default function GuestbookSection() {
               {submitting ? "작성 중..." : "방명록 남기기"}
             </button>
           </form>
-        </motion.div>
+        </div>
 
         {/* 방명록 목록 */}
         {loading ? (
@@ -203,34 +181,28 @@ export default function GuestbookSection() {
           </div>
         ) : (
           <div className="space-y-4">
-            <AnimatePresence>
-              {entries.map((entry, index) => (
-                <motion.div
-                  key={entry.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  className="p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      {entry.name}
-                    </h3>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
-                      {formatDate(entry.createdAt)}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                    {entry.message}
-                  </p>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {entries.map((entry) => (
+              <div
+                key={entry.id}
+                className="p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-all"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {entry.name}
+                  </h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ml-4">
+                    {formatDate(entry.createdAt)}
+                  </span>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {entry.message}
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </motion.section>
+    </section>
   );
 }
 
