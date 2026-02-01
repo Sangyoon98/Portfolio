@@ -1,140 +1,102 @@
-"use client";
-
-import { motion } from "framer-motion";
-import ContactCard from "@/components/ContactCard";
 import { profile } from "@/data/portfolio";
 
-// 연락처 섹션 컴포넌트
 export default function ContactSection() {
-  // 연락처 정보를 배열로 변환
-  const contactItems = [];
-
-  if (profile.contact.email) {
-    contactItems.push({
-      href: `mailto:${profile.contact.email}`,
-      icon: "📧",
-      label: "이메일",
-      value: profile.contact.email,
-    });
-  }
-
-  if (profile.contact.github) {
-    const githubPath = new URL(profile.contact.github).pathname.replace("/", "");
-    contactItems.push({
-      href: profile.contact.github,
-      icon: "🐙",
-      label: "GitHub",
-      value: `github.com/${githubPath}`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-    });
-  }
-
-  if (profile.contact.linkedin) {
-    contactItems.push({
-      href: profile.contact.linkedin,
-      icon: "💼",
-      label: "LinkedIn",
-      value: `linkedin.com${new URL(profile.contact.linkedin).pathname}`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-    });
-  }
-
-  if (profile.contact.blog) {
-    contactItems.push({
-      href: profile.contact.blog,
-      icon: "📝",
-      label: "Blog",
-      value: new URL(profile.contact.blog).host,
-      target: "_blank",
-      rel: "noopener noreferrer",
-    });
-  }
-
   return (
-    <motion.section
+    <section
       id="contact"
       aria-labelledby="contact-title"
-      className="bg-[#f4f4f5] dark:bg-white/[0.04] scroll-mt-14"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      className="bg-white dark:bg-white/[0.02] scroll-mt-14"
     >
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24">
-        <div className="text-center mb-12">
-          <h2
-            id="contact-title"
-            className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
-          >
-            Contact
-          </h2>
-          <div className="w-16 h-1 bg-purple-500 mx-auto mb-4"></div>
-          <p className="text-base text-black/70 dark:text-white/70">
-            새로운 기회와 협업에 항상 열려있습니다. 언제든 연락 주세요!
-          </p>
-        </div>
-
-        {/* 연락처 카드들 */}
-        <motion.div
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.1,
-              },
-            },
-          }}
+      <div className="mx-auto max-w-4xl px-6 lg:px-8 py-16 sm:py-24">
+        <h2
+          id="contact-title"
+          className="text-xl font-bold tracking-tight mb-6 pb-2 border-b border-black/10 dark:border-white/10"
         >
-          {contactItems.map((item) => (
-            <ContactCard key={item.label} {...item} />
-          ))}
-        </motion.div>
+          Contact
+        </h2>
 
-        {/* 소개 메시지 */}
-        <div className="mt-12 p-8 rounded-2xl border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]">
-          <h3 className="text-lg font-semibold mb-4">
-            함께 성장하고 싶습니다
-          </h3>
-          <p className="text-sm text-black/70 dark:text-white/70 mb-4">
-            새로운 도전과 학습에 열정적인 모바일 개발자입니다.
-          </p>
-          <ul className="space-y-2 text-sm text-black/70 dark:text-white/70">
-            <li>• 복잡한 문제를 해결하는 과정을 즐깁니다</li>
-            <li>• 새로운 기술 습득과 성장에 적극적입니다</li>
-            <li>• 팀과 함께 더 나은 서비스를 만들어갑니다</li>
-          </ul>
-          <p className="mt-4 text-sm font-medium text-black/80 dark:text-white/80">
-            언제든 연락 주세요! 좋은 기회로 만나뵙고 싶습니다. 👋
-          </p>
-        </div>
+        <p className="text-sm text-black/60 dark:text-white/60 mb-6">
+          새로운 기회와 협업에 항상 열려있습니다. 언제든 연락 주세요!
+        </p>
 
-        {/* Notion 링크 */}
-        {profile.contact.notion && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-black/60 dark:text-white/60">
-              상세 포트폴리오는{" "}
+        <div className="space-y-3">
+          {profile.contact.email && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">Email</span>
+              <a
+                href={`mailto:${profile.contact.email}`}
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                {profile.contact.email}
+              </a>
+            </div>
+          )}
+          {profile.contact.phone && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">Phone</span>
+              <a
+                href={`tel:${profile.contact.phone}`}
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                {profile.contact.phone}
+              </a>
+            </div>
+          )}
+          {profile.contact.github && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">GitHub</span>
+              <a
+                href={profile.contact.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                {profile.contact.github.replace("https://", "")}
+              </a>
+            </div>
+          )}
+          {profile.contact.linkedin && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">LinkedIn</span>
+              <a
+                href={profile.contact.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                {profile.contact.linkedin.replace("https://", "")}
+              </a>
+            </div>
+          )}
+          {profile.contact.blog && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">Blog</span>
+              <a
+                href={profile.contact.blog}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                {profile.contact.blog.replace("https://", "")}
+              </a>
+            </div>
+          )}
+          {profile.contact.notion && (
+            <div className="flex items-center gap-3">
+              <span className="w-20 text-sm text-black/50 dark:text-white/50">Notion</span>
               <a
                 href={profile.contact.notion}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-4 hover:text-blue-600 dark:hover:text-blue-400"
+                className="text-sm hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
               >
-                Notion
+                Portfolio (Notion)
               </a>
-              에서 확인할 수 있어요.
-            </p>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 }
 

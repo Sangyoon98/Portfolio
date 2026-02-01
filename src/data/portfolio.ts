@@ -7,9 +7,16 @@ export type Contact = {
   notion?: string;
 };
 
+export type SkillLevel = "expert" | "proficient" | "familiar";
+
+export type Skill = {
+  name: string;
+  level: SkillLevel;
+};
+
 export type SkillCategory = {
   category: string;
-  items: string[];
+  items: Skill[];
 };
 
 export type ProjectLink = {
@@ -45,6 +52,38 @@ export type Activity = {
   org?: string;
   period?: string;
   description?: string;
+  highlights?: string[];
+};
+
+export type Career = {
+  company: string;
+  position: string;
+  type: string;
+  period: string;
+  projects: string[];
+};
+
+export type Education = {
+  school: string;
+  major?: string;
+  doubleMajor?: string;
+  period: string;
+  gpa?: string;
+};
+
+export type Award = {
+  competition: string;
+  prize: string;
+  date: string;
+  organization: string;
+};
+
+export type Certification = {
+  name: string;
+  registrationNumber: string;
+  organization: string;
+  grade?: string;
+  date: string;
 };
 
 export const profile = {
@@ -70,73 +109,154 @@ export const profile = {
 
 export const skills: SkillCategory[] = [
   {
-    category: "Language",
-    items: [
-      "Java",
-      "Kotlin",
-      "HTML5",
-      "CSS3",
-      "JavaScript",
-      "TypeScript",
-      "Swift",
-      "C",
-      "C++",
-      "C#",
-      "Python",
-    ],
-  },
-  {
-    category: "Backend",
-    items: ["Spring Boot", "Flask", "Node.js"],
-  },
-  {
-    category: "Frontend",
-    items: ["React", "Vue", "Tailwind", "StyledComponent"],
-  },
-  {
     category: "Android",
     items: [
-      "Jetpack Compose",
-      "XML",
-      "Jetpack",
-      "Retrofit",
-      "Coroutines",
-      "RoomDB",
-      "Navigation",
-      "DataBinding",
-      "ViewBinding",
-      "Hilt",
-      "Flow",
+      { name: "Kotlin", level: "expert" },
+      { name: "Java", level: "expert" },
+      { name: "XML", level: "expert" },
+      { name: "Jetpack Compose", level: "expert" },
+      { name: "Coroutine", level: "expert" },
+      { name: "Retrofit2", level: "expert" },
+      { name: "Room", level: "expert" },
+      { name: "Hilt", level: "proficient" },
+      { name: "Data Binding", level: "expert" },
+      { name: "ViewBinding", level: "expert" },
+      { name: "Glide", level: "expert" },
+      { name: "Flow", level: "proficient" },
+      { name: "Coil", level: "familiar" },
+      { name: "Ktor", level: "familiar" },
+      { name: "Kotlin Multiplatform", level: "familiar" },
+      { name: "Compose Multiplatform", level: "familiar" },
+      { name: "Jetpack", level: "proficient" },
+      { name: "Gson", level: "expert" },
+      { name: "Navigation", level: "proficient" },
+      { name: "Paging", level: "proficient" },
+      { name: "LiveData", level: "expert" },
     ],
   },
   {
     category: "iOS",
-    items: ["SwiftUI"],
-  },
-  {
-    category: "Database",
-    items: ["MySQL", "MongoDB"],
-  },
-  {
-    category: "SDK / API",
     items: [
-      "Firebase Cloud Messaging",
-      "Lottie",
-      "Firebase",
-      "Toss Payments API",
-      "SendBird SDK",
-      "Google Maps API",
-      "Google Login API",
-      "Kakao Login API",
+      { name: "SwiftUI", level: "proficient" },
+      { name: "Swift", level: "proficient" },
+      { name: "Alamofire", level: "proficient" },
     ],
   },
   {
-    category: "Collaboration",
-    items: ["Jira", "Slack", "Asana", "Notion"],
+    category: "Web",
+    items: [
+      { name: "Spring Boot", level: "proficient" },
+      { name: "Ktor", level: "familiar" },
+      { name: "React", level: "proficient" },
+      { name: "Vue", level: "familiar" },
+      { name: "HTML", level: "expert" },
+      { name: "Javascript", level: "proficient" },
+      { name: "Typescript", level: "proficient" },
+      { name: "Tailwind CSS", level: "proficient" },
+      { name: "Styled Components", level: "familiar" },
+      { name: "CSS", level: "expert" },
+    ],
   },
   {
-    category: "Git",
-    items: ["Git", "GitHub", "BitBucket"],
+    category: "Database & Infra",
+    items: [
+      { name: "MySQL", level: "proficient" },
+      { name: "Firebase", level: "expert" },
+      { name: "Supabase", level: "familiar" },
+      { name: "AWS EC2", level: "familiar" },
+      { name: "Docker", level: "familiar" },
+    ],
+  },
+  {
+    category: "Collaboration & Tools",
+    items: [
+      { name: "Git", level: "expert" },
+      { name: "Github", level: "expert" },
+      { name: "Jira", level: "proficient" },
+      { name: "Slack", level: "expert" },
+      { name: "Asana", level: "proficient" },
+      { name: "Notion", level: "expert" },
+      { name: "Figma", level: "expert" },
+      { name: "Bitbucket", level: "proficient" },
+      { name: "Cursor", level: "proficient" },
+      { name: "Claude Code", level: "proficient" },
+      { name: "Codex CLI", level: "proficient" },
+      { name: "OpenCode", level: "familiar" },
+      { name: "Antigravity", level: "familiar" },
+    ],
+  },
+];
+
+export const career: Career[] = [
+  {
+    company: "(주)헬로비즈",
+    position: "사원 (정규직)",
+    type: "안드로이드 개발자",
+    period: "2023.06. ~ 2024.05. (1년 0개월)",
+    projects: [
+      "뇌졸중 신속 AI 선별 솔루션 '휴런 Strocare Suite Mobile' 안드로이드 개발",
+      "강남구어린이급식관리지원센터 아동 식단 관리 앱 '강남구 어린이급식관리지원센터 (시설앱, 부모앱)' 안드로이드 개발",
+      "성북구어린이급식관리지원센터 아동 식단 관리 앱 '점심시간이야기 (시설앱, 부모앱)' 안드로이드 개발",
+      "커피 픽업 전용 주문 앱 '콩오더, 콩오더 파트너스, 콩오더 파트너스(태블릿)' 안드로이드 개발",
+    ],
+  },
+];
+
+export const education: Education[] = [
+  {
+    school: "강남대학교 소프트웨어응용학부",
+    major: "소프트웨어전공",
+    doubleMajor: "가상현실전공",
+    period: "2017.03. ~ 2023.02. (졸업)",
+    gpa: "3.93 / 4.5",
+  },
+  {
+    school: "용인고등학교",
+    period: "2014.03. ~ 2017.02. (졸업)",
+  },
+];
+
+export const awards: Award[] = [
+  {
+    competition:
+      "2023 서울 열린데이터광장 공공데이터 활용 모바일 앱/웹 경진대회",
+    prize: "장려상",
+    date: "2023년 6월 30일",
+    organization: "서울특별시",
+  },
+  {
+    competition: "강남대학교 공과대학 소프트웨어응용학부 졸업작품전시회",
+    prize: "최우수상",
+    date: "2022년 12월 6일",
+    organization: "강남대학교",
+  },
+  {
+    competition: "제 21회 정보기술 및 응용 학술제",
+    prize: "장려상",
+    date: "2017년 5월 18일",
+    organization: "강남대학교",
+  },
+];
+
+export const certifications: Certification[] = [
+  {
+    name: "정보처리기사",
+    registrationNumber: "25202260273K",
+    organization: "한국산업인력공단",
+    date: "2025년 9월 12일",
+  },
+  {
+    name: "정보기술자격(ITQ)",
+    registrationNumber: "A001-2022252-003118",
+    organization: "한국생산성본부",
+    grade: "OA Master",
+    date: "2022년 12월 22일",
+  },
+  {
+    name: "ICDL Start Certification",
+    registrationNumber: "KR220000336S",
+    organization: "한국생산성본부",
+    date: "2022년 12월 22일",
   },
 ];
 
@@ -935,27 +1055,33 @@ export const activities: Activity[] = [
     org: "현대오토에버",
     period: "2025.04. ~ 2025.11",
     description:
-      "웹 풀스택 과정 (Backend, Frontend, Android, iOS) 수료. 현대자동차 특화 차량 리뷰 플랫폼 '타보니까' 프로젝트 개발, AI 기반 영화 리뷰 플랫폼 '인사이드무비' 프로젝트 개발, 중고차 거래 플랫폼 'Trever' 프로젝트 개발, 자동차 부품 관리 ERP '삼품관리' 프로젝트 개발",
+      "웹/앱 풀스택 과정에서 Android 중심으로 FE/BE/iOS까지 전 주기 개발 흐름을 경험했습니다. 팀 프로젝트 4개를 수행하며 API 연동, 데이터 흐름, 화면 상태 관리, 협업 방식(명세/이슈/PR)을 실제처럼 운영했습니다.",
+    highlights: [
+      "타보니까: 리뷰 목록·필터·댓글 기능을 FE/BE로 구현, QueryDSL로 복합 필터 성능 개선",
+      "인사이드무비: FE 리드로 로그인/회원/리뷰 UI 전반 구현, BE 연동 및 데이터 흐름 정리",
+      "Trever: iOS 리드로 Google OAuth, 거래/경매/계약서/찜하기 구현, RTDB 기반 데이터 동기화 경험",
+      "삼품관리(ERP): Android·iOS 앱 구현, Clean Architecture + MVVM 기반 구조 설계 및 기능 개발",
+    ],
   },
   {
     title: "강남대학교 모바일프로그래밍 멘토링 프로그램",
     org: "강남대학교",
     period: "2021.09. ~ 2021.12",
     description:
-      "교내 모바일프로그래밍 과목 멘토 선정. 매주 수업 후 수업 내용과 과제에 관한 질문을 받아 지도 및 교육",
+      "모바일프로그래밍 과목 멘토로 선정되어, 카카오톡으로 주차별 수업/과제 질문을 상시 대응했습니다. 과제 진행 중 발생한 오류를 함께 재현하고, 원인(로직/생명주기/뷰 처리/데이터 전달 등)을 짚어가며 해결하도록 도왔습니다. 단순히 정답 코드를 주기보다, 제출 결과가 안정적으로 나오도록 수정 방향과 리팩터링 포인트를 피드백하는 방식으로 지도했습니다. 이 경험을 통해 문제 상황을 빠르게 구조화하고, 상대가 이해할 수 있는 언어로 설명하는 디버깅 커뮤니케이션 능력을 키웠습니다.",
   },
   {
     title: "강남대학교 K-Project",
     org: "강남대학교",
     period: "2021.09. ~ 2021.12",
     description:
-      "교내 K-프로젝트 사업. 대학교 메타버스 프로젝트로 로블록스로 대학교 맵을 제작",
+      "로블록스 기반으로 대학교 맵을 제작하는 팀 프로젝트에서 맵 구성 및 상호작용 요소 구현을 담당했습니다. 사용자 동선과 체험 흐름을 고려해 공간을 설계하고, 반복 테스트로 조작감과 충돌/이동 이슈를 개선했습니다. 이 경험을 통해 기능 구현뿐 아니라, 사용자가 실제로 겪는 흐름을 기준으로 완성도를 끌어올리는 방식을 체득했습니다.",
   },
   {
     title: "코드잇 대학생 코딩 캠프 5기",
     org: "코드잇",
     period: "2021.05. ~ 2021.06",
     description:
-      "Git으로 배우는 버전관리 과목 수강, 웹 퍼블리싱 과목 수강, 유닉스 커맨드 라인 과목 수강",
+      "온라인으로 Git으로 배우는 버전관리, 웹 퍼블리싱, 유닉스 커맨드 라인 과목을 수강하며 Git 브랜치 전략, PR 기반 코드리뷰 흐름, 충돌 해결을 익혔습니다. 웹 퍼블리싱 기초(HTML/CSS)와 유닉스 커맨드라인으로 개발 환경 세팅, 로그 확인, 기본 자동화 흐름까지 다뤘습니다.",
   },
 ];
