@@ -438,7 +438,7 @@ export default function GuestbookPage() {
                           <span className="ml-1 text-gray-400">(수정됨)</span>
                         )}
                       </span>
-                      <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEditClick(entry)}
                           disabled={editingId === entry.id}
