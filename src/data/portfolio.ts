@@ -189,9 +189,16 @@ export const skills: SkillCategory[] = [
 
 export const career: Career[] = [
   {
+    company: "메가스터디교육(주)",
+    position: "IT지원그룹 | IT개발실 | 모바일개발팀 | 사원 (정규직)",
+    type: "안드로이드 개발",
+    period: "2026.02. ~ 재직중",
+    projects: [],
+  },
+  {
     company: "(주)헬로비즈",
     position: "사원 (정규직)",
-    type: "안드로이드 개발자",
+    type: "안드로이드 개발",
     period: "2023.06. ~ 2024.05. (1년 0개월)",
     projects: [
       "뇌졸중 신속 AI 선별 솔루션 '휴런 Strocare Suite Mobile' 안드로이드 개발",
