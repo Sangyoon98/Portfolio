@@ -98,7 +98,7 @@ export const profile = {
   birthday: "1998-06-26",
   location: "서울, 대한민국",
   contact: {
-    email: "qlrqod123123@naver.com",
+    email: "dev.sangyoon@gmail.com",
     phone: "010-4736-3559",
     github: "https://github.com/sangyoon98",
     linkedin: "https://linkedin.com/in/sangyoon-chae-38bb14278",
