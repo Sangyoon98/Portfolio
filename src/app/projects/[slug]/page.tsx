@@ -15,6 +15,7 @@ interface ProjectPageProps {
 }
 
 const projectSlugMap: { [key: string]: string } = {
+  "megastudy-smart-learning": "메가스터디 스마트러닝",
   "33auto": "삼품관리(33Auto)",
   trever: "Trever (Trade-Ever)",
   tarbonicar: "타보니까 (TarboniCar)",

@@ -193,7 +193,12 @@ export const career: Career[] = [
     position: "IT지원그룹 | IT개발실 | 모바일개발팀 | 사원 (정규직)",
     type: "안드로이드 개발",
     period: "2026.02. ~ 재직중",
-    projects: [],
+    projects: [
+      "메가스터디 스마트러닝 앱 신규 기능 개발 및 운영",
+      "북마크 신규 개발·수강 일시정지 Compose 전환, 재생 정책 공통화",
+      "Google Play 인앱 리뷰 도입, GA4 수집 체계 정비, Android 16 대응",
+      "마이페이지 Compose + MVI 개편 단독 담당",
+    ],
   },
   {
     company: "(주)헬로비즈",
@@ -268,6 +273,48 @@ export const certifications: Certification[] = [
 ];
 
 export const projects: Project[] = [
+  {
+    title: "메가스터디 스마트러닝",
+    description:
+      "고등 인강 학습 서비스 메가스터디 스마트러닝 Android 앱의 신규 기능 개발과 레거시 화면 개선을 담당하고 있습니다.",
+    overview:
+      "고등 인강 학습 서비스인 메가스터디 스마트러닝 Android 앱의 신규 기능 개발과 레거시 화면 개선을 담당합니다. 폰·태블릿, 라이트·다크 모드를 지원하며 화면 구현부터 공통 정책 정리, QA·릴리즈 대응까지 참여하고 있습니다.",
+    responsibilities: [
+      "**강의실 북마크 신규 개발 및 Compose 전환**: 기획·기술 문서를 작성하고 Compose + MVI, Clean Architecture로 북마크 조회·수정·선택 삭제와 재생 시점 이동을 구현했습니다. 수강 일시정지 화면도 Compose로 전환하며 다크 모드·태블릿에 대응했습니다.",
+      "**수강·네트워크 재생 정책 공통화**: 화면별로 흩어진 수강 시작일 설정·기기 등록·네트워크 재생 조건을 정책 체인으로 통합했습니다. 북마크와 강의 목록이 같은 진입 판단을 사용하도록 공통 처리와 생명주기 가드를 정리했습니다.",
+      "**인앱 리뷰 도입 및 Android 16 대응**: Google Play In-App Review를 연동하고 DataStore로 노출 조건을 관리해 중복 노출·중복 이력 적재를 방지했습니다. Target SDK 36의 대화면 동작 변경을 분석하고 태블릿·분할 화면·플레이어 회전 안내에 반영했습니다.",
+      "**GA4 수집 체계 정비**: 네이티브·웹뷰의 화면 및 클릭 이벤트 수집 기준을 정리했습니다. 자동·수동 화면 로그 혼용과 중복 적재, 화면명 오류를 수정하고 정책 문서와 검증 가이드를 작성했습니다.",
+      "**마이페이지 개편 단독 담당**: XML/DataBinding 화면을 별도 feature 모듈의 Compose + MVI 구조로 재구축하고 있습니다. 모듈 의존 방향을 정리하고 분리된 API 응답 병합·부분 실패 처리, 프로필 이미지 기능과 기존 제품·기기별 정책을 이관하고 있습니다.",
+      "**개발 규칙 정리 및 팀 기여**: 정책 패키지 생성 스킬과 사용 가이드를 작성하고 AI 개발 도구의 팀 공통 규칙·스킬 구성에 기여했습니다. 기술 문서를 현행화하고 AI 활용 사례를 주간 레터로 공유했습니다.",
+    ],
+    techStack: [
+      "**Android**: Kotlin, Jetpack Compose, MVI, Clean Architecture, Hilt, Coroutines/Flow, Retrofit, DataStore, Coil",
+      "**분석·운영**: Firebase Analytics(GA4), FCM, Google Play In-App Review, Firebase App Distribution",
+    ],
+    achievements: [
+      "2026년 6월·8월 정기 업데이트에 담당 기능을 반영하고, 6월 릴리즈의 내부 테스트 배포 1차~7차를 담당했습니다.",
+      "북마크 QA 이슈 15건 이상을 처리하고, 공통 UI와 재생 정책을 여러 화면에서 재사용할 수 있도록 정리했습니다.",
+    ],
+    tech: [
+      "Kotlin",
+      "Jetpack Compose",
+      "MVI",
+      "Clean Architecture",
+      "Hilt",
+      "Coroutines/Flow",
+      "Retrofit",
+      "DataStore",
+      "Coil",
+      "Firebase Analytics(GA4)",
+      "FCM",
+      "Google Play In-App Review",
+      "Firebase App Distribution",
+    ],
+    period: "2026.03. ~ 현재",
+    role: "Android Developer",
+    company: "메가스터디교육(주)",
+    status: "운영 중인 서비스",
+  },
   {
     title: "삼품관리(33Auto)",
     description:
