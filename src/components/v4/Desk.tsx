@@ -1,13 +1,14 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, Html, RoundedBox } from "@react-three/drei";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { AccumulativeShadows, ContactShadows, Environment, Html, Lightformer, RandomizedLight, RoundedBox } from "@react-three/drei";
+import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
 
 /**
- * "My desk": three devices, one per platform, sized by how much I've shipped on it.
- * Each screen is drawn from real data. Hover lifts a device and shows a summary; click filters projects.
+ * A small room. On the desk: one device per platform, sized by how much I've shipped on it.
+ * Screens are drawn from real data. Hover lifts a device; click filters the project list.
+ * ROOM_SLOTS are empty anchors for later props (hobbies etc.) — drop a mesh in via `extras`.
  */
 
 export type Platform = {
@@ -20,14 +21,25 @@ export type Platform = {
   color: string;
 };
 
+/** Anchor points (x, y, z) on the slab for future props (a mug, a figure, a plant…). y is the surface. */
+export const ROOM_SLOTS = {
+  deskLeft: [-4.6, 1.0, 0.9] as [number, number, number],
+  deskRight: [4.7, 1.0, 0.8] as [number, number, number],
+  deskBackLeft: [-4.9, 1.0, -1.8] as [number, number, number],
+  deskBackRight: [4.6, 1.0, -1.5] as [number, number, number],
+};
+
+const DESK_Y = 1.0;
 const FONT = '-apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
 const INK = "#1c1b2e";
 const MUTE = "#7a7690";
 
+/* ---------------- canvas helpers ---------------- */
+
 function tex(c: HTMLCanvasElement) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
+  t.anisotropy = 8;
   return t;
 }
 function rr(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number, fill: string) {
@@ -40,76 +52,110 @@ function chips(ctx: CanvasRenderingContext2D, items: string[], x: number, y: num
   ctx.font = `600 ${size}px ${FONT}`;
   let cx = x, cy = y;
   for (const it of items) {
-    const w = ctx.measureText(it).width + size * 1.4;
-    if (cx + w > x + maxW) { cx = x; cy += size * 2.3; }
-    rr(ctx, cx, cy, w, size * 1.9, size, "rgba(28,27,46,.08)");
+    const w = ctx.measureText(it).width + size * 1.5;
+    if (cx + w > x + maxW) { cx = x; cy += size * 2.4; }
+    rr(ctx, cx, cy, w, size * 2, size, "rgba(28,27,46,.08)");
     ctx.fillStyle = INK;
-    ctx.fillText(it, cx + size * 0.7, cy + size * 1.32);
+    ctx.fillText(it, cx + size * 0.75, cy + size * 1.4);
     cx += w + size * 0.6;
   }
-  return cy + size * 2.3;
+  return cy + size * 2.4;
+}
+/** shared "big number + label" block; returns next y */
+function headline(ctx: CanvasRenderingContext2D, p: Platform, x: number, y: number, big: number) {
+  ctx.fillStyle = MUTE; ctx.font = `700 ${big * 0.22}px ${FONT}`; ctx.fillText(p.label.toUpperCase(), x, y);
+  ctx.fillStyle = INK; ctx.font = `800 ${big}px ${FONT}`; ctx.fillText(String(p.count), x - big * 0.04, y + big * 0.98);
+  const cw = ctx.measureText(String(p.count)).width;
+  ctx.font = `600 ${big * 0.3}px ${FONT}`; ctx.fillText("개 프로젝트", x + cw + big * 0.08, y + big * 0.98);
+  ctx.fillStyle = MUTE; ctx.font = `500 ${big * 0.24}px ${FONT}`; ctx.fillText(`${p.since} — 현재`, x, y + big * 1.4);
+  return y + big * 1.75;
+}
+function projectList(ctx: CanvasRenderingContext2D, items: string[], x: number, y: number, w: number, size: number) {
+  const row = size * 2.6;
+  rr(ctx, x, y, w, row * items.length + size, size * 1.1, "rgba(255,255,255,.88)");
+  items.forEach((t, i) => {
+    ctx.fillStyle = INK; ctx.font = `600 ${size}px ${FONT}`;
+    ctx.fillText(t, x + size, y + size * 0.6 + row * i + size * 1.05);
+    if (i < items.length - 1) { ctx.fillStyle = "rgba(28,27,46,.08)"; ctx.fillRect(x + size, y + size * 0.6 + row * (i + 1) - size * 0.2, w - size * 2, 1.5); }
+  });
 }
 
-function phoneScreen(p: Platform) {
-  const W = 360, H = 740, d = 2;
+/** Phone screen with a black bezel baked in; `island` draws an iPhone-style pill. */
+function phoneScreen(p: Platform, island: boolean) {
+  const W = 390, H = 820, d = 2, bez = island ? 14 : 10, rad = island ? 56 : 34;
   const c = document.createElement("canvas");
   c.width = W * d; c.height = H * d;
   const ctx = c.getContext("2d")!;
   ctx.scale(d, d);
+  rr(ctx, 0, 0, W, H, rad + bez, "#0b0b10");
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(bez, bez, W - bez * 2, H - bez * 2, rad); ctx.clip();
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#ffffff"); g.addColorStop(1, p.color);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = MUTE; ctx.font = `600 13px ${FONT}`; ctx.fillText(p.label.toUpperCase(), 28, 76);
-  ctx.fillStyle = INK; ctx.font = `800 64px ${FONT}`; ctx.fillText(String(p.count), 26, 146);
-  const cw = ctx.measureText(String(p.count)).width;
-  ctx.font = `500 18px ${FONT}`; ctx.fillText("개 프로젝트", 26 + cw + 8, 146);
-  ctx.fillStyle = MUTE; ctx.font = `400 14px ${FONT}`; ctx.fillText(`${p.since} — 현재`, 28, 176);
-  const y = chips(ctx, p.stack, 28, 212, W - 56, 13);
-  rr(ctx, 20, y + 18, W - 40, 10 + p.projects.length * 44, 18, "rgba(255,255,255,.85)");
-  p.projects.forEach((t, i) => {
-    ctx.fillStyle = INK; ctx.font = `600 15px ${FONT}`; ctx.fillText(t, 38, y + 18 + 30 + i * 44);
-    ctx.fillStyle = "rgba(28,27,46,.08)"; if (i < p.projects.length - 1) ctx.fillRect(38, y + 18 + 44 + i * 44, W - 76, 1);
-  });
-  rr(ctx, W / 2 - 60, H - 26, 120, 5, 3, "rgba(28,27,46,.25)");
+  const y0 = headline(ctx, p, 34, island ? 150 : 120, 104);
+  const y1 = chips(ctx, p.stack.slice(0, 4), 34, y0, W - 68, 19);
+  projectList(ctx, p.projects.slice(0, 3), 24, y1 + 14, W - 48, 19);
+  rr(ctx, W / 2 - 64, H - 30, 128, 6, 3, "rgba(28,27,46,.3)");
+  ctx.restore();
+  if (island) rr(ctx, W / 2 - 62, 34, 124, 36, 18, "#0b0b10");
+  else { ctx.fillStyle = "#0b0b10"; ctx.beginPath(); ctx.arc(W / 2, 40, 9, 0, Math.PI * 2); ctx.fill(); }
   return tex(c);
 }
 
+/** MacBook lid: black bezel, rounded screen, notch. */
 function laptopScreen(p: Platform) {
-  const W = 1200, H = 750, d = 1.5;
+  const W = 1440, H = 920, d = 1.25, bez = 22;
   const c = document.createElement("canvas");
   c.width = W * d; c.height = H * d;
   const ctx = c.getContext("2d")!;
   ctx.scale(d, d);
+  rr(ctx, 0, 0, W, H, 40, "#0b0b10");
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(bez, bez, W - bez * 2, H - bez * 2, 22); ctx.clip();
   ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);
   // browser chrome
-  ctx.fillStyle = "#f1f0f8"; ctx.fillRect(0, 0, W, 64);
-  ["#ff6b6b", "#ffd166", "#6ee7b7"].forEach((col, i) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(28 + i * 22, 32, 7, 0, Math.PI * 2); ctx.fill(); });
-  rr(ctx, 120, 16, W - 240, 32, 16, "#ffffff");
-  ctx.fillStyle = MUTE; ctx.font = `500 15px ${FONT}`; ctx.fillText("sangyoon.dev / web", 140, 38);
-  // content
-  const g = ctx.createLinearGradient(0, 64, W, H);
+  ctx.fillStyle = "#eeecf6"; ctx.fillRect(0, 0, W, 78);
+  ["#ff6b6b", "#ffd166", "#6ee7b7"].forEach((col, i) => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(52 + i * 26, 48, 8, 0, Math.PI * 2); ctx.fill(); });
+  rr(ctx, 200, 27, W - 400, 42, 21, "#ffffff");
+  ctx.fillStyle = MUTE; ctx.font = `500 19px ${FONT}`; ctx.textAlign = "center"; ctx.fillText("sangyoon.dev / web", W / 2, 55); ctx.textAlign = "left";
+  const g = ctx.createLinearGradient(0, 78, W, H);
   g.addColorStop(0, "#ffffff"); g.addColorStop(1, p.color);
-  ctx.fillStyle = g; ctx.fillRect(0, 64, W, H - 64);
-  ctx.fillStyle = MUTE; ctx.font = `600 18px ${FONT}`; ctx.fillText(p.label.toUpperCase(), 72, 140);
-  ctx.fillStyle = INK; ctx.font = `800 120px ${FONT}`; ctx.fillText(String(p.count), 68, 262);
-  const cw = ctx.measureText(String(p.count)).width;
-  ctx.font = `500 30px ${FONT}`; ctx.fillText("개 프로젝트", 68 + cw + 12, 262);
-  ctx.fillStyle = MUTE; ctx.font = `400 22px ${FONT}`; ctx.fillText(`${p.since} — 현재`, 72, 306);
-  chips(ctx, p.stack, 72, 350, 520, 20);
-  rr(ctx, 660, 120, 470, 60 + p.projects.length * 70, 24, "rgba(255,255,255,.85)");
-  ctx.fillStyle = MUTE; ctx.font = `600 15px ${FONT}`; ctx.fillText("PROJECTS", 690, 160);
-  p.projects.forEach((t, i) => { ctx.fillStyle = INK; ctx.font = `600 24px ${FONT}`; ctx.fillText(t, 690, 208 + i * 70); });
+  ctx.fillStyle = g; ctx.fillRect(0, 78, W, H - 78);
+  const y0 = headline(ctx, p, 90, 200, 190);
+  chips(ctx, p.stack.slice(0, 5), 90, y0, 620, 28);
+  projectList(ctx, p.projects.slice(0, 3), 800, 190, 550, 30);
+  ctx.restore();
+  rr(ctx, W / 2 - 80, 0, 160, 40, 14, "#0b0b10"); // notch
   return tex(c);
 }
 
-/* ---------------- devices ---------------- */
+/** Keyboard + trackpad drawn onto the MacBook base. */
+function keyboardTexture() {
+  const W = 1024, H = 640;
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const ctx = c.getContext("2d")!;
+  ctx.fillStyle = "#d8d5e6"; ctx.fillRect(0, 0, W, H);
+  rr(ctx, 90, 40, W - 180, 300, 16, "#c9c5dc");
+  const cols = 14, rows = 5, kw = (W - 220) / cols, kh = 48;
+  for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) {
+    const wide = r === rows - 1 && k > 3 && k < 10;
+    if (wide && k !== 4) continue;
+    rr(ctx, 110 + k * kw + 3, 56 + r * (kh + 8), (wide ? kw * 6 : kw) - 6, kh, 6, "#eeecf6");
+  }
+  rr(ctx, W / 2 - 170, 380, 340, 220, 22, "#cfcbe0");
+  return tex(c);
+}
 
-function useHoverLift(hover: boolean, base: [number, number, number], lift = 0.22) {
+/* ---------------- shared behaviour ---------------- */
+
+function useHoverLift(hover: boolean, base: [number, number, number], lift = 0.2) {
   const g = useRef<THREE.Group>(null!);
   useFrame(() => {
     const k = 0.12;
     g.current.position.y += ((hover ? base[1] + lift : base[1]) - g.current.position.y) * k;
-    const s = THREE.MathUtils.lerp(g.current.scale.x, hover ? 1.04 : 1, k);
+    const s = THREE.MathUtils.lerp(g.current.scale.x, hover ? 1.035 : 1, k);
     g.current.scale.setScalar(s);
   });
   return g;
@@ -121,14 +167,14 @@ function Label({ p, hover, y }: { p: Platform; hover: boolean; y: number }) {
       <div
         style={{
           transform: `translateY(${hover ? 0 : 8}px) scale(${hover ? 1 : 0.94})`,
-          opacity: hover ? 1 : 0.75,
+          opacity: hover ? 1 : 0.8,
           transition: "all .35s cubic-bezier(.2,.7,.1,1)",
-          background: "rgba(255,255,255,.9)",
+          background: "rgba(255,255,255,.92)",
           backdropFilter: "blur(10px)",
           border: `1.5px solid ${hover ? INK : "rgba(28,27,46,.12)"}`,
           borderRadius: 999,
-          padding: "7px 14px",
-          fontSize: 13,
+          padding: "8px 15px",
+          fontSize: 14,
           fontWeight: 600,
           color: INK,
           whiteSpace: "nowrap",
@@ -136,32 +182,41 @@ function Label({ p, hover, y }: { p: Platform; hover: boolean; y: number }) {
           boxShadow: "0 12px 30px -14px rgba(60,50,120,.4)",
         }}
       >
-        {p.label} · {p.count}개 {hover ? `· ${p.stack.slice(0, 3).join(", ")} · 클릭해서 보기` : ""}
+        {p.label} · {p.count}개{hover ? ` · ${p.stack.slice(0, 3).join(", ")} · 클릭해서 보기` : ""}
       </div>
     </Html>
   );
 }
 
-function Phone({ p, position, rotation, size, onSelect }: { p: Platform; position: [number, number, number]; rotation: [number, number, number]; size: number; onSelect: () => void }) {
+type DeviceProps = { p: Platform; position: [number, number, number]; rotation: [number, number, number]; onSelect: () => void };
+
+function useDeviceHover(onSelect: () => void) {
   const [hover, setHover] = useState(false);
+  const handlers = {
+    onPointerOver: (e: { stopPropagation: () => void }) => { e.stopPropagation(); setHover(true); document.body.style.cursor = "pointer"; },
+    onPointerOut: () => { setHover(false); document.body.style.cursor = ""; },
+    onClick: (e: { stopPropagation: () => void }) => { e.stopPropagation(); onSelect(); },
+  };
+  return { hover, handlers };
+}
+
+/* ---------------- devices ---------------- */
+
+function AndroidPhone({ p, position, rotation, onSelect }: DeviceProps) {
+  const { hover, handlers } = useDeviceHover(onSelect);
   const g = useHoverLift(hover, position);
-  const screen = useMemo(() => phoneScreen(p), [p]);
+  const screen = useMemo(() => phoneScreen(p, false), [p]);
   useEffect(() => () => screen.dispose(), [screen]);
-  const w = 1.5 * size, h = 3.1 * size, dpt = 0.14 * size;
+  const w = 1.55, h = 3.25, dpt = 0.14;
   return (
     <group ref={g} position={position} rotation={rotation}>
-      <group
-        position={[0, h / 2, 0]}
-        onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = "pointer"; }}
-        onPointerOut={() => { setHover(false); document.body.style.cursor = ""; }}
-        onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      >
-        <RoundedBox args={[w, h, dpt]} radius={0.12 * size} smoothness={6}>
-          <meshStandardMaterial color="#e9e6f7" metalness={0.3} roughness={0.4} />
+      <group position={[0, h / 2, 0]} {...handlers}>
+        <RoundedBox args={[w, h, dpt]} radius={0.13} smoothness={6} castShadow receiveShadow>
+          <meshStandardMaterial color="#ddd8f0" roughness={0.95} />
         </RoundedBox>
         <mesh position={[0, 0, dpt / 2 + 0.001]}>
-          <planeGeometry args={[w - 0.12 * size, h - 0.14 * size]} />
-          <meshBasicMaterial map={screen} toneMapped={false} />
+          <planeGeometry args={[w - 0.06, h - 0.06]} />
+          <meshBasicMaterial map={screen} toneMapped={false} transparent />
         </mesh>
       </group>
       <Label p={p} hover={hover} y={h + 0.25} />
@@ -169,74 +224,123 @@ function Phone({ p, position, rotation, size, onSelect }: { p: Platform; positio
   );
 }
 
-function Laptop({ p, position, rotation, onSelect }: { p: Platform; position: [number, number, number]; rotation: [number, number, number]; onSelect: () => void }) {
-  const [hover, setHover] = useState(false);
-  const g = useHoverLift(hover, position, 0.16);
-  const screen = useMemo(() => laptopScreen(p), [p]);
+function IPhone({ p, position, rotation, onSelect }: DeviceProps) {
+  const { hover, handlers } = useDeviceHover(onSelect);
+  const g = useHoverLift(hover, position);
+  const screen = useMemo(() => phoneScreen(p, true), [p]);
   useEffect(() => () => screen.dispose(), [screen]);
-  const W = 3.4, D = 2.2, SH = 2.1;
+  const w = 1.22, h = 2.5, dpt = 0.12;
   return (
     <group ref={g} position={position} rotation={rotation}>
-      <group
-        onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = "pointer"; }}
-        onPointerOut={() => { setHover(false); document.body.style.cursor = ""; }}
-        onClick={(e) => { e.stopPropagation(); onSelect(); }}
-      >
-        {/* base */}
-        <RoundedBox args={[W, 0.12, D]} radius={0.05} smoothness={4} position={[0, 0.06, 0]}>
-          <meshStandardMaterial color="#e3e0f2" metalness={0.35} roughness={0.4} />
+      <group position={[0, h / 2, 0]} {...handlers}>
+        {/* titanium-ish frame with big corner radius */}
+        <RoundedBox args={[w, h, dpt]} radius={0.2} smoothness={8} castShadow receiveShadow>
+          <meshStandardMaterial color="#eadfe9" roughness={0.9} />
         </RoundedBox>
-        <mesh position={[0, 0.125, 0.15]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[W - 0.5, D - 0.9]} />
-          <meshStandardMaterial color="#d6d2ea" roughness={0.9} />
+        <mesh position={[0, 0, dpt / 2 + 0.001]}>
+          <planeGeometry args={[w - 0.04, h - 0.04]} />
+          <meshBasicMaterial map={screen} toneMapped={false} transparent />
         </mesh>
-        <mesh position={[0, 0.125, 0.85]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[1.1, 0.6]} />
-          <meshStandardMaterial color="#cfcbe6" roughness={0.9} />
-        </mesh>
-        {/* lid hinged at back edge */}
-        <group position={[0, 0.12, -D / 2]} rotation={[-0.32, 0, 0]}>
-          <RoundedBox args={[W, SH, 0.08]} radius={0.05} smoothness={4} position={[0, SH / 2, 0]}>
-            <meshStandardMaterial color="#e3e0f2" metalness={0.35} roughness={0.4} />
-          </RoundedBox>
-          <mesh position={[0, SH / 2, 0.041]}>
-            <planeGeometry args={[W - 0.16, SH - 0.16]} />
-            <meshBasicMaterial map={screen} toneMapped={false} />
-          </mesh>
-        </group>
+        {/* side buttons */}
+        <mesh position={[-w / 2 - 0.01, 0.55, 0]}><boxGeometry args={[0.02, 0.22, 0.05]} /><meshStandardMaterial color="#d8cfd8" /></mesh>
+        <mesh position={[-w / 2 - 0.01, 0.2, 0]}><boxGeometry args={[0.02, 0.32, 0.05]} /><meshStandardMaterial color="#d8cfd8" /></mesh>
+        <mesh position={[w / 2 + 0.01, 0.35, 0]}><boxGeometry args={[0.02, 0.45, 0.05]} /><meshStandardMaterial color="#d8cfd8" /></mesh>
       </group>
-      <Label p={p} hover={hover} y={SH + 0.4} />
+      <Label p={p} hover={hover} y={h + 0.25} />
     </group>
   );
 }
 
-function Parallax({ children }: { children: React.ReactNode }) {
+function MacBook({ p, position, rotation, onSelect }: DeviceProps) {
+  const { hover, handlers } = useDeviceHover(onSelect);
+  const g = useHoverLift(hover, position, 0.14);
+  const screen = useMemo(() => laptopScreen(p), [p]);
+  const keys = useMemo(() => keyboardTexture(), []);
+  useEffect(() => () => { screen.dispose(); keys.dispose(); }, [screen, keys]);
+  const W = 3.7, D = 2.45, T = 0.09, SH = 2.36, LT = 0.06;
+  return (
+    <group ref={g} position={position} rotation={rotation}>
+      <group {...handlers}>
+        {/* base */}
+        <RoundedBox args={[W, T, D]} radius={0.04} smoothness={4} position={[0, T / 2, 0]} castShadow receiveShadow>
+          <meshStandardMaterial color="#d7d3e6" roughness={0.9} />
+        </RoundedBox>
+        <mesh position={[0, T + 0.001, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[W - 0.2, D - 0.3]} />
+          <meshStandardMaterial map={keys} roughness={0.9} />
+        </mesh>
+        {/* lid, hinged at the back edge, tilted open */}
+        <group position={[0, T, -D / 2 + 0.03]} rotation={[-0.36, 0, 0]}>
+          <RoundedBox args={[W, SH, LT]} radius={0.05} smoothness={4} position={[0, SH / 2, 0]} castShadow receiveShadow>
+            <meshStandardMaterial color="#d7d3e6" roughness={0.9} />
+          </RoundedBox>
+          <mesh position={[0, SH / 2, LT / 2 + 0.001]}>
+            <planeGeometry args={[W - 0.08, SH - 0.08]} />
+            <meshBasicMaterial map={screen} toneMapped={false} transparent />
+          </mesh>
+        </group>
+      </group>
+      <Label p={p} hover={hover} y={SH + 0.45} />
+    </group>
+  );
+}
+
+/* ---------------- floating clay slab (no walls: the page gradient is the background) ---------------- */
+
+function Slab() {
+  return (
+    <group>
+      <RoundedBox args={[11.2, 0.5, 5.2]} radius={0.25} smoothness={6} position={[0, DESK_Y - 0.25, 0]} castShadow receiveShadow>
+        <meshStandardMaterial color="#f3eef7" roughness={1} />
+      </RoundedBox>
+      {/* soft, accumulated shadows of the devices onto the slab */}
+      <AccumulativeShadows temporal frames={40} alphaTest={0.9} opacity={0.85} scale={12} position={[0, DESK_Y + 0.002, 0]} color="#5a4a8c">
+        <RandomizedLight amount={6} radius={4} ambient={0.55} intensity={1.1} position={[-3, 6, 4]} bias={0.001} />
+      </AccumulativeShadows>
+      {/* the slab itself floats over the page */}
+      <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={18} blur={3} far={1.6} color="#4a3a7a" />
+      {/* placeholder prop in a slot — swap for a hobby model later */}
+      <group position={ROOM_SLOTS.deskBackLeft}>
+        <mesh position={[0, 0.25, 0]} castShadow receiveShadow><cylinderGeometry args={[0.26, 0.2, 0.5, 24]} /><meshStandardMaterial color="#e8dacd" roughness={1} /></mesh>
+        <mesh position={[0, 0.8, 0]} castShadow><sphereGeometry args={[0.42, 24, 24]} /><meshStandardMaterial color="#c3e8d2" roughness={1} /></mesh>
+        <mesh position={[0.26, 1.05, 0.08]} castShadow><sphereGeometry args={[0.25, 20, 20]} /><meshStandardMaterial color="#ace0c3" roughness={1} /></mesh>
+      </group>
+    </group>
+  );
+}
+
+function Parallax({ children }: { children: ReactNode }) {
   const g = useRef<THREE.Group>(null!);
   const { pointer, viewport } = useThree();
-  // the desk is ~8.4 units wide; shrink it on narrow screens so all three devices stay in frame
-  const fit = Math.min(1, viewport.getCurrentViewport(undefined, [0, 1, 0]).width / 8.6);
+  const fit = Math.min(1, viewport.width / 11.5);
   useFrame(() => {
-    g.current.rotation.y += (pointer.x * 0.14 - g.current.rotation.y) * 0.06;
-    g.current.rotation.x += (-pointer.y * 0.05 - g.current.rotation.x) * 0.06;
+    g.current.rotation.y += (pointer.x * 0.09 - g.current.rotation.y) * 0.06;
+    g.current.rotation.x += (-pointer.y * 0.03 - g.current.rotation.x) * 0.06;
   });
   return <group ref={g} scale={fit}>{children}</group>;
 }
 
-export function DeskCanvas({ platforms, onSelect }: { platforms: Platform[]; onSelect: (key: Platform["key"]) => void }) {
+export function DeskCanvas({ platforms, onSelect, extras }: { platforms: Platform[]; onSelect: (key: Platform["key"]) => void; extras?: ReactNode }) {
   const android = platforms.find((p) => p.key === "android")!;
   const ios = platforms.find((p) => p.key === "ios")!;
   const web = platforms.find((p) => p.key === "web")!;
   return (
-    <Canvas camera={{ position: [0, 2.4, 9], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.35, 0)}>
-      <ambientLight intensity={1.15} />
-      <directionalLight position={[4, 7, 6]} intensity={1.7} />
-      <directionalLight position={[-6, 3, 2]} intensity={0.7} color="#ffe3ee" />
+    <Canvas shadows="soft" camera={{ position: [0.4, 3.6, 10], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.6, -0.2)}>
+      {/* studio light built from light panels — no HDR download */}
+      <Environment resolution={128}>
+        <Lightformer intensity={1.6} form="rect" position={[0, 6, -3]} scale={[12, 5, 1]} target={[0, 0, 0]} />
+        <Lightformer intensity={0.9} form="rect" position={[-6, 3, 4]} scale={[4, 4, 1]} color="#ffe9f1" target={[0, 1, 0]} />
+        <Lightformer intensity={0.7} form="rect" position={[6, 2, 4]} scale={[4, 3, 1]} color="#e6f0ff" target={[0, 1, 0]} />
+      </Environment>
+      <ambientLight intensity={0.35} />
+      <directionalLight castShadow position={[-3, 7, 5]} intensity={1.3} shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-camera-left={-8} shadow-camera-right={8} shadow-camera-top={8} shadow-camera-bottom={-8} />
       <Suspense fallback={null}>
         <Parallax>
-          <Laptop p={web} position={[-2.35, 0, -0.9]} rotation={[0, 0.42, 0]} onSelect={() => onSelect("web")} />
-          <Phone p={android} position={[0.55, 0, 0.7]} rotation={[-0.08, -0.12, 0]} size={1} onSelect={() => onSelect("android")} />
-          <Phone p={ios} position={[2.55, 0, -0.1]} rotation={[-0.06, -0.42, 0]} size={0.78} onSelect={() => onSelect("ios")} />
-          <ContactShadows position={[0, 0.001, 0]} opacity={0.28} scale={14} blur={2.6} far={4} color="#3a2f7a" />
+          <Slab />
+          <MacBook p={web} position={[-2.7, DESK_Y, -0.6]} rotation={[0, 0.34, 0]} onSelect={() => onSelect("web")} />
+          <AndroidPhone p={android} position={[0.55, DESK_Y, 0.8]} rotation={[-0.1, -0.1, 0]} onSelect={() => onSelect("android")} />
+          <IPhone p={ios} position={[2.75, DESK_Y, 0.15]} rotation={[-0.08, -0.4, 0]} onSelect={() => onSelect("ios")} />
+          {extras}
         </Parallax>
       </Suspense>
     </Canvas>

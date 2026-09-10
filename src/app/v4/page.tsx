@@ -111,10 +111,10 @@ export default function V4Page() {
             </p>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-[58vh] sm:h-[66vh]">
+        <div className="absolute inset-x-0 bottom-0 h-[62vh] sm:h-[70vh]">
           <DeskCanvas platforms={platforms} onSelect={pick} />
         </div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-24 text-center text-[13px] text-[#7a7690]">기기 = 플랫폼. 크기가 경험량입니다. 기기를 눌러 그 플랫폼 프로젝트만 보기</div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-24 flex justify-center text-[13px] text-[#7a7690]"><span className="rounded-full bg-white/80 px-4 py-1.5 backdrop-blur">기기 하나가 플랫폼 하나, 크기가 경험량. 눌러서 그 플랫폼 프로젝트 보기</span></div>
         <div className="absolute inset-x-0 bottom-8 flex justify-center">
           <a href="#about" className="flex h-[60px] w-[34px] items-start justify-center rounded-3xl border-2 border-[#1c1b2e]/40 p-2">
             <span className="h-3 w-3 rounded-full bg-[#1c1b2e]/70" style={{ animation: "v4-bounce 1.6s infinite" }} />
