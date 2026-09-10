@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { projects } from "@/data/portfolio";
 
-const slugMap: { [key: string]: string } = {
+export const slugMap: { [key: string]: string } = {
   "메가스터디 스마트러닝": "megastudy-smart-learning",
   "삼품관리(33Auto)": "33auto",
   "Trever (Trade-Ever)": "trever",
