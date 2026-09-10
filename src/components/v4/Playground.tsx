@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Physics, useBox, usePlane, type PublicApi } from "@react-three/cannon";
+import { ContactShadows, RoundedBox } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -15,12 +16,11 @@ export type Cube = { label: string; cat: string; color: string };
 const S = 0.82; // cube size
 type Held = { api: PublicApi; pos: THREE.Vector3 } | null;
 
-function labelTexture(text: string, face: string, alpha = 1) {
+function labelTexture(text: string, alpha = 1) {
   const px = 256;
   const c = document.createElement("canvas");
   c.width = px; c.height = px;
   const ctx = c.getContext("2d")!;
-  ctx.fillStyle = face; ctx.fillRect(0, 0, px, px);
   ctx.fillStyle = "#1c1b2e"; ctx.globalAlpha = alpha;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   let s = 54;
@@ -71,21 +71,28 @@ function Block({ cube, i, start, heldRef, cmd }: { cube: Cube; i: number; start:
     api.position.set(target[0], target[1] + (cmd.kind === "tower" ? 0.02 * i : 0.6), target[2]);
   }, [cmd, api, i]);
 
-  const mats = useMemo(() => {
-    const plain = new THREE.MeshStandardMaterial({ color: cube.color, roughness: 0.75 });
-    const front = new THREE.MeshStandardMaterial({ map: labelTexture(cube.label, cube.color), roughness: 0.75 });
-    const top = new THREE.MeshStandardMaterial({ map: labelTexture(cube.label, cube.color, 0.5), roughness: 0.75 });
-    return [plain, plain, top, plain, front, plain];
-  }, [cube.label, cube.color]);
-  useEffect(() => () => mats.forEach((m) => { m.map?.dispose(); m.dispose(); }), [mats]);
+  const top = useMemo(() => labelTexture(cube.label, 0.9), [cube.label]);
+  const front = useMemo(() => labelTexture(cube.label, 0.55), [cube.label]);
+  useEffect(() => () => { top.dispose(); front.dispose(); }, [top, front]);
 
   const onDown = (e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); heldRef.current = { api, pos }; api.wakeUp(); };
   const onUp = () => { if (heldRef.current?.api === api) heldRef.current = null; };
 
   return (
-    <mesh ref={ref as React.RefObject<THREE.Mesh>} material={mats} onPointerDown={onDown} onPointerUp={onUp} onPointerOver={() => (document.body.style.cursor = "grab")} onPointerOut={() => (document.body.style.cursor = "")}>
-      <boxGeometry args={[S, S, S]} />
-    </mesh>
+    <group ref={ref as React.RefObject<THREE.Group>}>
+      {/* keycap-like clay block: rounded edges, matte, label printed on top and front */}
+      <RoundedBox args={[S, S, S]} radius={0.16} smoothness={5} castShadow receiveShadow onPointerDown={onDown} onPointerUp={onUp} onPointerOver={() => (document.body.style.cursor = "grab")} onPointerOut={() => (document.body.style.cursor = "")}>
+        <meshStandardMaterial color={cube.color} roughness={0.95} />
+      </RoundedBox>
+      <mesh position={[0, S / 2 + 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[S * 0.86, S * 0.86]} />
+        <meshBasicMaterial map={top} transparent toneMapped={false} depthWrite={false} />
+      </mesh>
+      <mesh position={[0, 0, S / 2 + 0.002]}>
+        <planeGeometry args={[S * 0.86, S * 0.86]} />
+        <meshBasicMaterial map={front} transparent toneMapped={false} depthWrite={false} />
+      </mesh>
+    </group>
   );
 }
 const TOTAL_HOLDER = { n: 0 };
@@ -93,14 +100,30 @@ const TOTAL_HOLDER = { n: 0 };
 function Table() {
   const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], material: { friction: 1 } }));
   return (
-    <mesh ref={ref as React.RefObject<THREE.Mesh>}>
-      <planeGeometry args={[60, 60]} />
-      <meshStandardMaterial color="#eeedf7" roughness={1} />
-    </mesh>
+    <group>
+      <mesh ref={ref as React.RefObject<THREE.Mesh>} visible={false}>
+        <planeGeometry args={[60, 60]} />
+        <meshBasicMaterial />
+      </mesh>
+      <ContactShadows position={[0, 0.001, 0]} opacity={0.45} scale={22} blur={2.2} far={2.5} color="#3f3270" frames={Infinity} />
+    </group>
   );
 }
 function Wall({ position, args }: { position: [number, number, number]; args: [number, number, number] }) {
   useBox(() => ({ type: "Static", position, args }));
+  return null;
+}
+
+// pulls the camera back on narrow viewports so the whole table stays in frame
+function CameraFit() {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    const aspect = size.width / size.height;
+    const z = 10.5 * Math.max(1, 1.75 / aspect);
+    camera.position.set(0, 5.2 * (z / 10.5), z);
+    camera.lookAt(0, 0.4, 0);
+    camera.updateProjectionMatrix();
+  }, [camera, size]);
   return null;
 }
 
@@ -143,10 +166,11 @@ export default function Playground({ cubes, legend }: { cubes: Cube[]; legend: {
 
   return (
     <div>
-      <div className="h-[380px] sm:h-[460px] overflow-hidden rounded-[22px] bg-[#eeedf7] touch-none">
-        <Canvas camera={{ position: [0, 5.2, 10.5], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 0.4, 0)}>
+      <div className="h-[380px] sm:h-[460px] overflow-hidden rounded-[28px] touch-none" style={{ background: "linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.15))" }}>
+        <Canvas shadows="soft" camera={{ position: [0, 5.2, 10.5], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }}>
+          <CameraFit />
           <ambientLight intensity={1.1} />
-          <directionalLight position={[4, 8, 5]} intensity={1.6} />
+          <directionalLight castShadow position={[4, 8, 5]} intensity={1.6} shadow-mapSize={[1024, 1024]} shadow-bias={-0.0004} shadow-camera-left={-9} shadow-camera-right={9} shadow-camera-top={9} shadow-camera-bottom={-9} />
           <directionalLight position={[-6, 4, -2]} intensity={0.5} color="#ffe3ee" />
           <Physics gravity={[0, -9.81, 0]} defaultContactMaterial={{ friction: 0.9, restitution: 0.05 }} iterations={12}>
             <Table />

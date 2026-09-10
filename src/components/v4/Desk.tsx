@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { AccumulativeShadows, ContactShadows, Environment, Html, Lightformer, RandomizedLight, RoundedBox } from "@react-three/drei";
+import { ContactShadows, Environment, Html, Lightformer, RoundedBox } from "@react-three/drei";
 import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
 
@@ -21,12 +21,12 @@ export type Platform = {
   color: string;
 };
 
-/** Anchor points (x, y, z) on the slab for future props (a mug, a figure, a plant…). y is the surface. */
+/** Anchor points (x, y, z) beside the devices for future props (a hobby model, a mascot…). y is the ground. */
 export const ROOM_SLOTS = {
-  deskLeft: [-4.6, 1.0, 0.9] as [number, number, number],
-  deskRight: [4.7, 1.0, 0.8] as [number, number, number],
-  deskBackLeft: [-4.9, 1.0, -1.8] as [number, number, number],
-  deskBackRight: [4.6, 1.0, -1.5] as [number, number, number],
+  left: [-5.2, 1.0, 0.6] as [number, number, number],
+  right: [5.0, 1.0, 0.4] as [number, number, number],
+  backLeft: [-4.6, 1.0, -1.6] as [number, number, number],
+  backRight: [4.6, 1.0, -1.5] as [number, number, number],
 };
 
 const DESK_Y = 1.0;
@@ -285,28 +285,10 @@ function MacBook({ p, position, rotation, onSelect }: DeviceProps) {
   );
 }
 
-/* ---------------- floating clay slab (no walls: the page gradient is the background) ---------------- */
+/* ---------------- ground: nothing but a soft contact shadow, so the page is the background ---------------- */
 
-function Slab() {
-  return (
-    <group>
-      <RoundedBox args={[11.2, 0.5, 5.2]} radius={0.25} smoothness={6} position={[0, DESK_Y - 0.25, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#f3eef7" roughness={1} />
-      </RoundedBox>
-      {/* soft, accumulated shadows of the devices onto the slab */}
-      <AccumulativeShadows temporal frames={40} alphaTest={0.9} opacity={0.85} scale={12} position={[0, DESK_Y + 0.002, 0]} color="#5a4a8c">
-        <RandomizedLight amount={6} radius={4} ambient={0.55} intensity={1.1} position={[-3, 6, 4]} bias={0.001} />
-      </AccumulativeShadows>
-      {/* the slab itself floats over the page */}
-      <ContactShadows position={[0, 0.02, 0]} opacity={0.35} scale={18} blur={3} far={1.6} color="#4a3a7a" />
-      {/* placeholder prop in a slot — swap for a hobby model later */}
-      <group position={ROOM_SLOTS.deskBackLeft}>
-        <mesh position={[0, 0.25, 0]} castShadow receiveShadow><cylinderGeometry args={[0.26, 0.2, 0.5, 24]} /><meshStandardMaterial color="#e8dacd" roughness={1} /></mesh>
-        <mesh position={[0, 0.8, 0]} castShadow><sphereGeometry args={[0.42, 24, 24]} /><meshStandardMaterial color="#c3e8d2" roughness={1} /></mesh>
-        <mesh position={[0.26, 1.05, 0.08]} castShadow><sphereGeometry args={[0.25, 20, 20]} /><meshStandardMaterial color="#ace0c3" roughness={1} /></mesh>
-      </group>
-    </group>
-  );
+function Ground() {
+  return <ContactShadows position={[0, DESK_Y + 0.001, 0]} opacity={0.42} scale={14} blur={2.6} far={3.2} color="#3f3270" />;
 }
 
 function Parallax({ children }: { children: ReactNode }) {
@@ -325,7 +307,7 @@ export function DeskCanvas({ platforms, onSelect, extras }: { platforms: Platfor
   const ios = platforms.find((p) => p.key === "ios")!;
   const web = platforms.find((p) => p.key === "web")!;
   return (
-    <Canvas shadows="soft" camera={{ position: [0.4, 3.6, 10], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.6, -0.2)}>
+    <Canvas shadows="soft" camera={{ position: [0.3, 3.0, 9.6], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.7, -0.2)}>
       {/* studio light built from light panels — no HDR download */}
       <Environment resolution={128}>
         <Lightformer intensity={1.6} form="rect" position={[0, 6, -3]} scale={[12, 5, 1]} target={[0, 0, 0]} />
@@ -336,7 +318,7 @@ export function DeskCanvas({ platforms, onSelect, extras }: { platforms: Platfor
       <directionalLight castShadow position={[-3, 7, 5]} intensity={1.3} shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-camera-left={-8} shadow-camera-right={8} shadow-camera-top={8} shadow-camera-bottom={-8} />
       <Suspense fallback={null}>
         <Parallax>
-          <Slab />
+          <Ground />
           <MacBook p={web} position={[-2.7, DESK_Y, -0.6]} rotation={[0, 0.34, 0]} onSelect={() => onSelect("web")} />
           <AndroidPhone p={android} position={[0.55, DESK_Y, 0.8]} rotation={[-0.1, -0.1, 0]} onSelect={() => onSelect("android")} />
           <IPhone p={ios} position={[2.75, DESK_Y, 0.15]} rotation={[-0.08, -0.4, 0]} onSelect={() => onSelect("ios")} />

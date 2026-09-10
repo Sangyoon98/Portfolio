@@ -11,7 +11,7 @@ import { Reveal, SectionHead, Tilt } from "@/components/v4/fx";
 const ParticlesCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.ParticlesCanvas), { ssr: false });
 const DeskCanvas = dynamic(() => import("@/components/v4/Desk").then((m) => m.DeskCanvas), { ssr: false });
 import type { Platform } from "@/components/v4/Desk";
-const Playground = dynamic(() => import("@/components/v4/Playground"), { ssr: false, loading: () => <div className="h-[380px] sm:h-[460px] rounded-[22px] bg-[#eeedf7]" /> });
+const Playground = dynamic(() => import("@/components/v4/Playground"), { ssr: false, loading: () => <div className="h-[380px] sm:h-[460px] rounded-[28px] bg-white/30" /> });
 const OrbCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.OrbCanvas), { ssr: false });
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Noto Sans KR", "Segoe UI", sans-serif';
@@ -131,7 +131,7 @@ export default function V4Page() {
 
       {/* about */}
       <section id="about" className={`${SECTION} relative pt-24 pb-10`}>
-        <Reveal><SectionHead sub="Introduction" title="소개." /></Reveal>
+        <Reveal><SectionHead sub="Introduction" title="소개" /></Reveal>
         <Reveal delay={100}>
           <p className="mt-5 max-w-[720px] text-[17px] leading-[1.8] text-[#3a3750]">
             안드로이드 실무 경험을 기반으로 안정적이고 완성도 높은 서비스를 만들어 왔습니다. 웹 프론트엔드, 백엔드, iOS까지 경험하며 서비스 전체를 이해하는 시야를 키웠고, 사용자 친화적인 UI·UX를 고민하는 것을 가장 중요한 가치로 삼습니다. 문제 해결에서는 끝까지 파고드는 집요함을, 협업에서는 원활한 커뮤니케이션을 강점으로 합니다.
@@ -158,7 +158,7 @@ export default function V4Page() {
 
       {/* experience timeline */}
       <section id="work" className={`${SECTION} relative pt-24 pb-10`}>
-        <Reveal className="text-center"><SectionHead sub="What I have done so far" title="경력." /></Reveal>
+        <Reveal className="text-center"><SectionHead sub="What I have done so far" title="경력" /></Reveal>
         <div className="tl relative mt-16 flex flex-col gap-10">
           {timeline.map((t, i) => (
             <div key={t.title} className={`relative flex items-start gap-6 md:gap-0 ${i % 2 ? "md:flex-row-reverse" : ""}`}>
@@ -183,7 +183,7 @@ export default function V4Page() {
 
       {/* skills playground */}
       <section id="skills" className={`${SECTION} relative pt-24 pb-10`}>
-        <Reveal><SectionHead sub="Tech stack" title="기술." /></Reveal>
+        <Reveal><SectionHead sub="Tech stack" title="기술" /></Reveal>
         <Reveal delay={100}>
           <p className="mt-5 max-w-[720px] text-[17px] leading-[1.8] text-[#3a3750]">
             익숙한 도구들을 큐브로 올려두었습니다. 마음대로 잡아 던지고 쌓아보세요. 색은 분야입니다.
@@ -196,7 +196,7 @@ export default function V4Page() {
 
       {/* projects */}
       <section id="projects" className={`${SECTION} relative pt-24 pb-10`}>
-        <Reveal><SectionHead sub="My work" title="프로젝트." /></Reveal>
+        <Reveal><SectionHead sub="My work" title="프로젝트" /></Reveal>
         <Reveal delay={100}>
           <p className="mt-5 max-w-[720px] text-[17px] leading-[1.8] text-[#3a3750]">
             실제 사용자에게 출시한 서비스와 팀 프로젝트입니다. 카드를 누르면 상세 페이지로, 아이콘을 누르면 GitHub 또는 스토어로 이동합니다.
@@ -245,7 +245,7 @@ export default function V4Page() {
       {/* contact */}
       <section id="contact" className={`${SECTION} relative flex flex-col gap-10 pt-24 pb-24 lg:flex-row`}>
         <Reveal from="left" className="flex-[0.75] rounded-[26px] bg-white p-8 shadow-[0_30px_80px_-40px_rgba(60,50,120,.5)]">
-          <SectionHead sub="Get in touch" title="연락." />
+          <SectionHead sub="Get in touch" title="연락" />
           <form onSubmit={send} className="mt-8 flex flex-col gap-6">
             <label className="flex flex-col gap-2"><span className="text-[15px] font-medium">이름</span><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="어떻게 불러드릴까요?" className="rounded-xl bg-[#f3f2fa] px-5 py-4 outline-none ring-[#7c5cff] focus:ring-2" /></label>
             <label className="flex flex-col gap-2"><span className="text-[15px] font-medium">이메일</span><input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="답장 받을 주소" className="rounded-xl bg-[#f3f2fa] px-5 py-4 outline-none ring-[#7c5cff] focus:ring-2" /></label>
