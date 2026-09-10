@@ -35,14 +35,15 @@ function labelTexture(text: string, w: number, h: number, alpha = 1) {
 }
 
 // resting spots: three rows, tiles packed by their widths
-function scatterLayout(cubes: Cube[]): [number, number, number][] {
-  const rows: number[][] = [[], [], []];
-  cubes.forEach((_, i) => rows[i % 3].push(i));
+function scatterLayout(cubes: Cube[], nRows = 3): [number, number, number][] {
+  const rows: number[][] = Array.from({ length: nRows }, () => []);
+  cubes.forEach((_, i) => rows[i % nRows].push(i));
   const out: [number, number, number][] = [];
   rows.forEach((row, r) => {
     const total = row.reduce((a, i) => a + widthOf(cubes[i].label), 0) + (row.length - 1) * 0.35;
     let x = -total / 2;
-    row.forEach((i) => { const w = widthOf(cubes[i].label); out[i] = [x + w / 2, H / 2, 1.5 - r * 1.5]; x += w + 0.35; });
+    const gapZ = nRows > 3 ? 1.25 : 1.5;
+    row.forEach((i) => { const w = widthOf(cubes[i].label); out[i] = [x + w / 2, H / 2, ((nRows - 1) / 2 - r) * gapZ]; x += w + 0.35; });
   });
   return out;
 }
@@ -61,7 +62,7 @@ function towerLayout(cubes: Cube[]): [number, number, number][] {
   return out;
 }
 
-function Block({ cube, i, start, heldRef, cmd, all }: { cube: Cube; i: number; start: [number, number, number]; heldRef: React.MutableRefObject<Held>; cmd: { n: number; kind: "tower" | "scatter" | "shake" }; all: Cube[] }) {
+function Block({ cube, i, start, heldRef, cmd, all, nRows }: { cube: Cube; i: number; start: [number, number, number]; heldRef: React.MutableRefObject<Held>; cmd: { n: number; kind: "tower" | "scatter" | "shake" }; all: Cube[]; nRows: number }) {
   const W = widthOf(cube.label);
   const [ref, api] = useBox(() => ({ mass: 1, args: [W, H, D], position: start, angularDamping: 0.6, linearDamping: 0.08, material: { friction: 0.9, restitution: 0.05 } }));
   const pos = useMemo(() => new THREE.Vector3(...start), [start]);
@@ -73,12 +74,12 @@ function Block({ cube, i, start, heldRef, cmd, all }: { cube: Cube; i: number; s
       api.applyImpulse([(Math.random() - 0.5) * 6, 5 + Math.random() * 3, (Math.random() - 0.5) * 6], [0, 0, 0]);
       return;
     }
-    const target = (cmd.kind === "tower" ? towerLayout(all) : scatterLayout(all))[i];
+    const target = (cmd.kind === "tower" ? towerLayout(all) : scatterLayout(all, nRows))[i];
     api.velocity.set(0, 0, 0);
     api.angularVelocity.set(0, 0, 0);
     api.rotation.set(0, 0, 0);
     api.position.set(target[0], target[1] + (cmd.kind === "tower" ? 0.02 * i : 0.6), target[2]);
-  }, [cmd, api, i, all]);
+  }, [cmd, api, i, all, nRows]);
 
   const top = useMemo(() => labelTexture(cube.label, W, D, 0.92), [cube.label, W]);
   const front = useMemo(() => labelTexture(cube.label, W, H, 0.6), [cube.label, W]);
@@ -127,7 +128,7 @@ function CameraFit() {
   const { camera, size } = useThree();
   useEffect(() => {
     const aspect = size.width / size.height;
-    const k = Math.max(1, 1.75 / aspect);
+    const k = Math.max(1, Math.pow(1.75 / aspect, 0.85));
     camera.position.set(0, 8.2 * k, 6.8 * k);
     camera.lookAt(0, 0, -0.2);
     camera.updateProjectionMatrix();
@@ -168,7 +169,9 @@ function Drag({ heldRef }: { heldRef: React.MutableRefObject<Held> }) {
 export default function Playground({ cubes, legend }: { cubes: Cube[]; legend: { cat: string; color: string }[] }) {
   const heldRef = useRef<Held>(null);
   const [cmd, setCmd] = useState<{ n: number; kind: "tower" | "scatter" | "shake" }>({ n: 0, kind: "scatter" });
-  const starts = useMemo(() => scatterLayout(cubes), [cubes]);
+  // narrow screens get more, shorter rows so the table fits the frame (client-only component, so window is safe)
+  const nRows = typeof window !== "undefined" && window.innerWidth < 760 ? 5 : 3;
+  const starts = useMemo(() => scatterLayout(cubes, nRows), [cubes, nRows]);
   const btn = "rounded-full border border-[#1c1b2e]/15 bg-white px-3.5 py-1.5 text-[13px] font-medium hover:border-[#1c1b2e] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7c5cff]";
 
   return (
@@ -185,7 +188,7 @@ export default function Playground({ cubes, legend }: { cubes: Cube[]; legend: {
             <Wall position={[7.5, 3, 0]} args={[1, 12, 20]} />
             <Wall position={[0, 3, -4]} args={[30, 12, 1]} />
             <Wall position={[0, 3, 4]} args={[30, 12, 1]} />
-            {cubes.map((c, i) => <Block key={c.label} cube={c} i={i} start={starts[i]} heldRef={heldRef} cmd={cmd} all={cubes} />)}
+            {cubes.map((c, i) => <Block key={c.label} cube={c} i={i} start={starts[i]} heldRef={heldRef} cmd={cmd} all={cubes} nRows={nRows} />)}
             <Drag heldRef={heldRef} />
           </Physics>
         </Canvas>
@@ -193,7 +196,7 @@ export default function Playground({ cubes, legend }: { cubes: Cube[]; legend: {
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-[13px] text-[#7a7690]">
         <div className="flex flex-wrap items-center gap-4">
           {legend.map((l) => <span key={l.cat} className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={{ background: l.color }} />{l.cat}</span>)}
-          <span>큐브를 잡아 원하는 대로 쌓아보세요.</span>
+          <span>블록을 잡아 원하는 대로 쌓아보세요.</span>
         </div>
         <div className="flex gap-2">
           <button className={btn} onClick={() => setCmd((c) => ({ n: c.n + 1, kind: "tower" }))}>탑으로 쌓기</button>
