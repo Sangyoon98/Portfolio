@@ -3,14 +3,15 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { activities, career, education, profile, projects, skills } from "@/data/portfolio";
 import { slugMap } from "@/components/ProjectsSection";
 import { Reveal, SectionHead, Tilt } from "@/components/v4/fx";
 
 const ParticlesCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.ParticlesCanvas), { ssr: false });
-const HeroCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.HeroCanvas), { ssr: false });
-const TechCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.TechCanvas), { ssr: false });
+const DeskCanvas = dynamic(() => import("@/components/v4/Desk").then((m) => m.DeskCanvas), { ssr: false });
+import type { Platform } from "@/components/v4/Desk";
+const Playground = dynamic(() => import("@/components/v4/Playground"), { ssr: false, loading: () => <div className="h-[380px] sm:h-[460px] rounded-[22px] bg-[#eeedf7]" /> });
 const OrbCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.OrbCanvas), { ssr: false });
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Noto Sans KR", "Segoe UI", sans-serif';
@@ -25,20 +26,42 @@ const SERVICES = [
 
 const SECTION = "mx-auto max-w-[1180px] px-6 sm:px-10";
 
+type PKey = Platform["key"];
+function platformsOf(role?: string): PKey[] {
+  const r = (role ?? "").toLowerCase();
+  const out: PKey[] = [];
+  if (r.includes("android")) out.push("android");
+  if (r.includes("ios")) out.push("ios");
+  if (/frontend|backend|fullstack|web/.test(r)) out.push("web");
+  return out.length ? out : ["android"];
+}
+const CAT_COLOR: Record<string, string> = { Android: "#cdbfff", iOS: "#ffc2d6", Web: "#b8f0e3", "Database & Infra": "#ffe3a3", "Collaboration & Tools": "#bfe4ff" };
+
 export default function V4Page() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [filter, setFilter] = useState<"all" | PKey>("all");
+
+  const shipped = useMemo(() => projects.filter((p) => p.period), []);
+  const platforms = useMemo<Platform[]>(() => {
+    const mk = (key: PKey, label: string, cat: string, color: string): Platform => {
+      const list = shipped.filter((p) => platformsOf(p.role).includes(key));
+      const years = list.map((p) => parseInt(p.period!.slice(0, 4), 10));
+      const stack = (skills.find((s) => s.category === cat)?.items ?? []).filter((s) => s.level !== "familiar").slice(0, key === "web" ? 5 : 5).map((s) => s.name);
+      return { key, label, stack, count: list.length, since: String(Math.min(...years)), projects: list.slice(0, key === "android" ? 4 : 3).map((p) => p.title), color };
+    };
+    return [mk("android", "Android", "Android", "#e6dcff"), mk("ios", "iOS", "iOS", "#ffe0ea"), mk("web", "Web · Backend", "Web", "#d9f5ec")];
+  }, [shipped]);
+  const visible = filter === "all" ? shipped : shipped.filter((p) => platformsOf(p.role).includes(filter));
+  const pick = (key: PKey) => { setFilter(key); document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" }); };
+
+  const QUOTA: Record<string, number> = { Android: 8, iOS: 3, Web: 4, "Database & Infra": 2, "Collaboration & Tools": 3 };
+  const cubes = skills.flatMap((c) => c.items.filter((s) => s.level !== "familiar").slice(0, QUOTA[c.category] ?? 0).map((s) => ({ label: s.name, cat: c.category, color: CAT_COLOR[c.category] ?? "#e5e5ef" })));
+  const legend = Object.entries(CAT_COLOR).map(([cat, color]) => ({ cat, color }));
   const send = (e: React.FormEvent) => {
     e.preventDefault();
     const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
     location.href = `mailto:${profile.contact.email}?subject=${encodeURIComponent("포트폴리오를 보고 연락드립니다")}&body=${body}`;
   };
-
-  const techs = [
-    ...(skills.find((s) => s.category === "Android")?.items.filter((s) => s.level === "expert").slice(0, 6) ?? []),
-    ...(skills.find((s) => s.category === "Android")?.items.filter((s) => s.level === "proficient").slice(0, 2) ?? []),
-    ...(skills.find((s) => s.category === "iOS")?.items.slice(0, 1) ?? []),
-    ...(skills.find((s) => s.category === "Web")?.items.filter((s) => s.level === "proficient").slice(0, 3) ?? []),
-  ];
 
   const timeline = [
     ...career.map((c) => ({ title: c.company, sub: c.type, period: c.period.replace(" ~ 재직중", " — 현재").replace(/ \(.*\)/, "").replace(" ~ ", " — "), points: c.projects.slice(0, 3), color: "#7c5cff", initial: c.company.replace("(주)", "").slice(0, 1) })),
@@ -64,6 +87,7 @@ export default function V4Page() {
           <div className="hidden gap-8 text-[15px] text-[#7a7690] sm:flex">
             <a href="#about" className="hover:text-[#1c1b2e]">소개</a>
             <a href="#work" className="hover:text-[#1c1b2e]">경력</a>
+            <a href="#skills" className="hover:text-[#1c1b2e]">기술</a>
             <a href="#projects" className="hover:text-[#1c1b2e]">프로젝트</a>
             <a href="#contact" className="hover:text-[#1c1b2e]">연락</a>
           </div>
@@ -78,18 +102,19 @@ export default function V4Page() {
             <span className="h-40 w-1 rounded-full sm:h-80" style={{ background: "linear-gradient(#7c5cff, rgba(124,92,255,0))" }} />
           </div>
           <div>
-            <h1 className="text-[40px] font-black leading-[1.1] tracking-[-0.03em] sm:text-[64px] lg:text-[76px]">
+            <h1 className="break-keep text-[40px] font-black leading-[1.1] tracking-[-0.03em] sm:text-[64px] lg:text-[76px]">
               안녕하세요, <span className="text-[#7c5cff]">채상윤</span>입니다
             </h1>
             <p className="mt-4 max-w-[560px] text-[17px] leading-relaxed text-[#3a3750] sm:text-[24px] sm:leading-snug">
-              모바일로 연결하고, 사용자 경험으로 완성하는 <br className="hidden sm:block" />
-              Android 개발자입니다. 지금은 메가스터디교육에 있습니다.
+              Android가 주력이고, iOS와 웹까지 만듭니다. <br className="hidden sm:block" />
+              지금은 메가스터디교육에서 스마트러닝 앱을 개발합니다.
             </p>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-[62vh] sm:h-[70vh]">
-          <HeroCanvas />
+        <div className="absolute inset-x-0 bottom-0 h-[58vh] sm:h-[66vh]">
+          <DeskCanvas platforms={platforms} onSelect={pick} />
         </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-24 text-center text-[13px] text-[#7a7690]">기기 = 플랫폼. 크기가 경험량입니다. 기기를 눌러 그 플랫폼 프로젝트만 보기</div>
         <div className="absolute inset-x-0 bottom-8 flex justify-center">
           <a href="#about" className="flex h-[60px] w-[34px] items-start justify-center rounded-3xl border-2 border-[#1c1b2e]/40 p-2">
             <span className="h-3 w-3 rounded-full bg-[#1c1b2e]/70" style={{ animation: "v4-bounce 1.6s infinite" }} />
@@ -156,13 +181,17 @@ export default function V4Page() {
         </div>
       </section>
 
-      {/* tech balls */}
-      <section className={`${SECTION} relative pt-24 pb-10`}>
+      {/* skills playground */}
+      <section id="skills" className={`${SECTION} relative pt-24 pb-10`}>
         <Reveal><SectionHead sub="Tech stack" title="기술." /></Reveal>
-        <div className="mt-6 h-[300px] sm:h-[360px]">
-          <TechCanvas items={techs.map((t, i) => ({ label: t.name, color: PALETTE[i % PALETTE.length] }))} />
+        <Reveal delay={100}>
+          <p className="mt-5 max-w-[720px] text-[17px] leading-[1.8] text-[#3a3750]">
+            익숙한 도구들을 큐브로 올려두었습니다. 마음대로 잡아 던지고 쌓아보세요. 색은 분야입니다.
+          </p>
+        </Reveal>
+        <div className="mt-10">
+          <Playground cubes={cubes} legend={legend} />
         </div>
-        <p className="mt-4 text-center text-[13px] text-[#7a7690]">볼에 마우스를 올리면 빨리 돕니다</p>
       </section>
 
       {/* projects */}
@@ -173,8 +202,15 @@ export default function V4Page() {
             실제 사용자에게 출시한 서비스와 팀 프로젝트입니다. 카드를 누르면 상세 페이지로, 아이콘을 누르면 GitHub 또는 스토어로 이동합니다.
           </p>
         </Reveal>
-        <div className="mt-14 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.filter((p) => p.period).slice(0, 9).map((p, i) => {
+        <div className="mt-8 flex flex-wrap gap-2">
+          {([["all", "전체"], ["android", "Android"], ["ios", "iOS"], ["web", "Web · Backend"]] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setFilter(k)} className={`rounded-full px-4 py-2 text-[14px] font-medium transition-colors ${filter === k ? "bg-[#1c1b2e] text-white" : "bg-white text-[#3a3750] hover:bg-[#ece9f8]"}`}>
+              {l} <span className="opacity-60">{k === "all" ? shipped.length : platforms.find((p) => p.key === k)?.count}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-8 grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((p, i) => {
             const slug = slugMap[p.title];
             const gh = p.links?.find((l) => l.label.toLowerCase().includes("github"));
             const store = p.links?.find((l) => l.label.toLowerCase().includes("play"));
@@ -204,7 +240,6 @@ export default function V4Page() {
             );
           })}
         </div>
-        <div className="mt-10 text-center"><Link href="/#projects" className="inline-flex items-center gap-2 rounded-full bg-[#1c1b2e] px-6 py-3 text-[15px] font-medium text-white hover:bg-[#7c5cff] transition-colors">전체 {projects.length}개 보기 →</Link></div>
       </section>
 
       {/* contact */}
