@@ -54,9 +54,11 @@ export default function V4Page() {
   const visible = filter === "all" ? shipped : shipped.filter((p) => platformsOf(p.role).includes(filter));
   const pick = (key: PKey) => { setFilter(key); document.querySelector("#projects")?.scrollIntoView({ behavior: "smooth" }); };
 
-  const QUOTA: Record<string, number> = { Android: 8, iOS: 3, Web: 4, "Database & Infra": 2, "Collaboration & Tools": 3 };
-  const cubes = skills.flatMap((c) => c.items.filter((s) => s.level !== "familiar").slice(0, QUOTA[c.category] ?? 0).map((s) => ({ label: s.name, cat: c.category, color: CAT_COLOR[c.category] ?? "#e5e5ef" })));
-  const legend = Object.entries(CAT_COLOR).map(([cat, color]) => ({ cat, color }));
+  const cubes = useMemo(() => {
+    const QUOTA: Record<string, number> = { Android: 7, iOS: 2, Web: 4, "Database & Infra": 2, "Collaboration & Tools": 3 };
+    return skills.flatMap((c) => c.items.filter((s) => s.level !== "familiar").slice(0, QUOTA[c.category] ?? 0).map((s) => ({ label: s.name, cat: c.category, color: CAT_COLOR[c.category] ?? "#e5e5ef" })));
+  }, []);
+  const legend = useMemo(() => Object.entries(CAT_COLOR).map(([cat, color]) => ({ cat, color })), []);
   const send = (e: React.FormEvent) => {
     e.preventDefault();
     const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
@@ -186,7 +188,7 @@ export default function V4Page() {
         <Reveal><SectionHead sub="Tech stack" title="기술" /></Reveal>
         <Reveal delay={100}>
           <p className="mt-5 max-w-[720px] text-[17px] leading-[1.8] text-[#3a3750]">
-            익숙한 도구들을 큐브로 올려두었습니다. 마음대로 잡아 던지고 쌓아보세요. 색은 분야입니다.
+            익숙한 도구들을 블록으로 올려두었습니다. 마음대로 잡아 던지고 쌓아보세요. 색은 분야입니다.
           </p>
         </Reveal>
         <div className="mt-10">
