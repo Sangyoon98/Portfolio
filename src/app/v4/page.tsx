@@ -107,8 +107,8 @@ export default function V4Page() {
               안녕하세요, <span className="text-[#7c5cff]">채상윤</span>입니다
             </h1>
             <p className="mt-4 max-w-[560px] text-[17px] leading-relaxed text-[#3a3750] sm:text-[24px] sm:leading-snug">
-              Android가 주력이고, iOS와 웹까지 만듭니다. <br className="hidden sm:block" />
-              지금은 메가스터디교육에서 스마트러닝 앱을 개발합니다.
+              Android가 홈그라운드입니다. <br className="hidden sm:block" />
+              만들고 싶은 게 생기면 플랫폼을 가리지 않고, 끝까지 만듭니다.
             </p>
           </div>
         </div>
