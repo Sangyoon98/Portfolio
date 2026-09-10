@@ -12,7 +12,6 @@ const ParticlesCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) 
 const DeskCanvas = dynamic(() => import("@/components/v4/Desk").then((m) => m.DeskCanvas), { ssr: false });
 import type { Platform } from "@/components/v4/Desk";
 const Playground = dynamic(() => import("@/components/v4/Playground"), { ssr: false, loading: () => <div className="h-[380px] sm:h-[460px] rounded-[28px] bg-white/30" /> });
-const OrbCanvas = dynamic(() => import("@/components/v4/Scenes").then((m) => m.OrbCanvas), { ssr: false });
 
 const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Noto Sans KR", "Segoe UI", sans-serif';
 const PALETTE = ["#cdbfff", "#ffc2d6", "#b8f0e3", "#ffe3a3", "#bfe4ff", "#dcc9ff", "#ffd2bd", "#c9f3d3"];
@@ -245,8 +244,8 @@ export default function V4Page() {
       </section>
 
       {/* contact */}
-      <section id="contact" className={`${SECTION} relative flex flex-col gap-10 pt-24 pb-24 lg:flex-row`}>
-        <Reveal from="left" className="flex-[0.75] rounded-[26px] bg-white p-8 shadow-[0_30px_80px_-40px_rgba(60,50,120,.5)]">
+      <section id="contact" className={`${SECTION} relative pt-24 pb-24`}>
+        <Reveal className="mx-auto max-w-[720px] rounded-[26px] bg-white p-8 shadow-[0_30px_80px_-40px_rgba(60,50,120,.5)] sm:p-10">
           <SectionHead sub="Get in touch" title="연락" />
           <form onSubmit={send} className="mt-8 flex flex-col gap-6">
             <label className="flex flex-col gap-2"><span className="text-[15px] font-medium">이름</span><input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="어떻게 불러드릴까요?" className="rounded-xl bg-[#f3f2fa] px-5 py-4 outline-none ring-[#7c5cff] focus:ring-2" /></label>
@@ -262,9 +261,6 @@ export default function V4Page() {
             <Link href="/guestbook" className="hover:text-[#1c1b2e]">Crew Talk</Link>
           </div>
         </Reveal>
-        <div className="h-[380px] flex-1 lg:h-auto lg:min-h-[560px]">
-          <OrbCanvas />
-        </div>
       </section>
 
       <footer className={`${SECTION} pb-10 text-center text-[13px] text-[#7a7690]`}>© 2026 {profile.name} · <Link href="/" className="hover:text-[#1c1b2e]">이전 버전</Link></footer>
