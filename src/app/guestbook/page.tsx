@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
-import { profile } from "@/data/portfolio";
+import { V4, V4Head, V4Shell } from "@/components/v4/Shell";
 
 // Crew Talk 항목 타입
 type GuestbookEntry = {
@@ -297,360 +296,138 @@ export default function GuestbookPage() {
     }
   };
 
+  const totalPages = Math.ceil(total / itemsPerPage);
+
   return (
-    <div className="bg-white dark:bg-white/[0.02]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-black/5 dark:border-white/10">
-        <nav className="mx-auto max-w-4xl px-6 lg:px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="text-base font-semibold tracking-tight">
-            {profile.name}
-          </Link>
-          <Link
-            href="/"
-            className="text-base hover:underline underline-offset-4"
-          >
-            ← 포트폴리오로
-          </Link>
-        </nav>
-      </header>
+    <V4Shell back={{ href: "/v4", label: "홈" }}>
+      <V4Head sub="Crew Talk" title="함께 일한 분들의 한마디">
+        <p className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-[#3a3750]">
+          같이 일했거나, 같이 만들었거나, 같이 배웠던 분이라면 한 줄 남겨주세요. 이름은 일부만 표시됩니다.
+        </p>
+      </V4Head>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-6 lg:px-8 py-24">
-        <div>
-          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4">
-            Crew Talk
-          </h1>
-          <p className="text-lg text-black/70 dark:text-white/70 mb-12">
-            함께 일한 경험이 있으시다면 한마디 남겨주세요!
-          </p>
+      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[400px_1fr]">
+        {/* write */}
+        <section className={`${V4.card} p-7 lg:sticky lg:top-24 lg:self-start`}>
+          <h2 className={`${V4.eyebrow} mb-5`}>남기기</h2>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-2 text-[14px] font-medium">
+              이름
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={50} required className={V4.input} placeholder="어떻게 불러드릴까요?" />
+            </label>
+            <label className="flex flex-col gap-2 text-[14px] font-medium">
+              메시지
+              <textarea value={message} onChange={(e) => setMessage(e.target.value)} maxLength={500} required rows={5} className={`${V4.input} resize-none`} placeholder="함께한 기억, 전하고 싶은 말" />
+              <span className="text-right text-[12px] font-normal text-[#a2a0b3]">{message.length}/500</span>
+            </label>
+            <label className="flex flex-col gap-2 text-[14px] font-medium">
+              비밀번호 <span className="font-normal text-[#a2a0b3]">(선택 · 나중에 수정·삭제할 때)</span>
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength={4} className={V4.input} placeholder="4자 이상" />
+            </label>
+            {error && !showPasswordModal && <div className="rounded-xl bg-[#ffe4ea] px-4 py-3 text-[14px] text-[#b3264a]">{error}</div>}
+            {success && <div className="rounded-xl bg-[#dff6e8] px-4 py-3 text-[14px] text-[#1f6b45]">남겨주셔서 감사합니다!</div>}
+            <button type="submit" disabled={submitting} className={`${V4.btn} mt-1 w-full`}>{submitting ? "남기는 중…" : "남기기"}</button>
+          </form>
+        </section>
 
-          {/* Crew Talk 작성 폼 */}
-          <div className="mb-12 p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02]">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-                >
-                  이름
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={50}
-                  required
-                  className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
-                  placeholder="이름을 입력해주세요"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-                >
-                  메시지
-                </label>
-                <textarea
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  maxLength={500}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 resize-none"
-                  placeholder="메시지를 입력해주세요 (최대 500자)"
-                />
-                <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {message.length}/500
-                </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-                >
-                  비밀번호 (선택사항)
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={4}
-                  className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
-                  placeholder="나중에 수정/삭제할 때 사용할 비밀번호 (4자 이상)"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  비밀번호를 설정하면 나중에 본인의 글을 수정하거나 삭제할 수 있습니다.
-                </p>
-              </div>
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-sm">
-                  작성되었습니다!
-                </div>
-              )}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full px-6 py-3 rounded-lg bg-purple-600 dark:bg-purple-500 text-white font-medium hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "작성 중..." : "작성하기"}
-              </button>
-            </form>
+        {/* list */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between px-1">
+            <h2 className={V4.eyebrow}>메시지</h2>
+            {total > 0 && <span className="text-[13px] text-[#7a7690]">{total}개</span>}
           </div>
 
-          {/* Crew Talk 목록 */}
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">
-                불러오는 중...
-              </p>
-            </div>
+            <div className={`${V4.card} p-10 text-center text-[#7a7690]`}>불러오는 중…</div>
           ) : entries.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">
-                아직 작성된 글이 없습니다. 첫 번째 글을 남겨주세요!
-              </p>
-            </div>
+            <div className={`${V4.card} p-10 text-center text-[#7a7690]`}>아직 첫 메시지가 없습니다. 첫 번째로 남겨주세요.</div>
           ) : (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold mb-6">Crew Talk</h2>
-              {entries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="p-6 rounded-lg border border-black/5 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] hover:bg-white/90 dark:hover:bg-white/[0.05] transition-all relative group"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      {maskName(entry.name)}
-                    </h3>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                        {formatDate(entry.updatedAt || entry.createdAt)}
-                        {entry.updatedAt && (
-                          <span className="ml-1 text-gray-400">(수정됨)</span>
-                        )}
-                      </span>
-                      <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEditClick(entry)}
-                          disabled={editingId === entry.id}
-                          className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded disabled:opacity-50 transition-all"
-                          title="수정"
-                        >
-                          {editingId === entry.id ? "수정 중..." : "수정"}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(entry.id)}
-                          disabled={deletingId === entry.id}
-                          className="px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded disabled:opacity-50 transition-all"
-                          title="삭제"
-                        >
-                          {deletingId === entry.id ? "삭제 중..." : "삭제"}
-                        </button>
+            entries.map((entry) => (
+              <article key={entry.id} className={`${V4.card} group relative p-6 transition-transform duration-300 hover:-translate-y-0.5`}>
+                <div className="mb-3 flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ece9f8] text-[14px] font-bold text-[#5b4bd6]">{entry.name.slice(0, 1)}</span>
+                    <div>
+                      <div className="text-[15px] font-semibold">{maskName(entry.name)}</div>
+                      <div className="text-[12px] text-[#a2a0b3]">
+                        {formatDate(entry.updatedAt || entry.createdAt)}{entry.updatedAt && " · 수정됨"}
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                    {entry.message}
-                  </p>
-                </div>
-              ))}
-
-            {/* 무한 스크롤 트리거 (모바일) */}
-            {hasMore && (
-              <div
-                ref={observerTarget}
-                className="py-8 text-center sm:hidden"
-              >
-                {loadingMore && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    더 불러오는 중...
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* 데스크톱: 페이지네이션 */}
-            {total > itemsPerPage && (
-              <div className="hidden sm:flex items-center justify-center gap-2 py-8">
-                <button
-                  onClick={() => fetchEntries(false, currentPage - 1)}
-                  disabled={currentPage === 1 || loading}
-                  className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  이전
-                </button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from(
-                    { length: Math.ceil(total / itemsPerPage) },
-                    (_, i) => i + 1
-                  )
-                    .filter((page) => {
-                      // 현재 페이지 주변 2페이지씩만 표시
-                      const totalPages = Math.ceil(total / itemsPerPage);
-                      if (totalPages <= 7) return true; // 전체 페이지가 7개 이하면 모두 표시
-                      if (page === 1 || page === totalPages) return true; // 첫 페이지와 마지막 페이지
-                      return (
-                        page >= currentPage - 2 && page <= currentPage + 2
-                      );
-                    })
-                    .map((page, index, array) => {
-                      // 생략 표시 추가
-                      const prevPage = array[index - 1];
-                      const showEllipsis = prevPage && page - prevPage > 1;
-
-                      return (
-                        <div key={page} className="flex items-center gap-1">
-                          {showEllipsis && (
-                            <span className="px-2 text-gray-500 dark:text-gray-400">
-                              ...
-                            </span>
-                          )}
-                          <button
-                            onClick={() => fetchEntries(false, page)}
-                            disabled={loading}
-                            className={`min-w-[40px] px-3 py-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                              currentPage === page
-                                ? "bg-purple-600 dark:bg-purple-500 text-white border-purple-600 dark:border-purple-500"
-                                : "border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1]"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                <button
-                  onClick={() => fetchEntries(false, currentPage + 1)}
-                  disabled={
-                    currentPage >= Math.ceil(total / itemsPerPage) || loading
-                  }
-                  className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  다음
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      </main>
-
-      {/* 비밀번호 확인 모달 */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
-              {modalType === "delete" ? "삭제" : "수정"}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              {modalType === "delete"
-                ? "작성 시 설정한 비밀번호 또는 관리자 비밀번호를 입력해주세요."
-                : "작성 시 설정한 비밀번호를 입력해주세요."}
-            </p>
-            <div className="space-y-4">
-              {modalType === "edit" && (
-                <div>
-                  <label
-                    htmlFor="edit-message"
-                    className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-                  >
-                    메시지
-                  </label>
-                  <textarea
-                    id="edit-message"
-                    value={editMessage}
-                    onChange={(e) => setEditMessage(e.target.value)}
-                    maxLength={500}
-                    required
-                    rows={4}
-                    className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 resize-none"
-                    placeholder="메시지를 입력해주세요 (최대 500자)"
-                  />
-                  <div className="text-right text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {editMessage.length}/500
+                  <div className="flex items-center gap-1 text-[12px] transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+                    <button onClick={() => handleEditClick(entry)} disabled={editingId === entry.id} className="rounded-full px-2.5 py-1 text-[#5b4bd6] hover:bg-[#ece9f8] disabled:opacity-50">{editingId === entry.id ? "수정 중…" : "수정"}</button>
+                    <button onClick={() => handleDeleteClick(entry.id)} disabled={deletingId === entry.id} className="rounded-full px-2.5 py-1 text-[#b3264a] hover:bg-[#ffe4ea] disabled:opacity-50">{deletingId === entry.id ? "삭제 중…" : "삭제"}</button>
                   </div>
                 </div>
-              )}
-              <div>
-                <label
-                  htmlFor="modal-password"
-                  className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
-                >
-                  비밀번호
-                </label>
-                <input
-                  type="password"
-                  id="modal-password"
-                  value={modalPassword}
-                  onChange={(e) => setModalPassword(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && modalType === "delete") {
-                      handlePasswordConfirm();
-                    }
-                  }}
-                  className="w-full px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400"
-                  placeholder="비밀번호를 입력하세요"
-                  autoFocus
-                />
+                <p className="whitespace-pre-wrap text-[15px] leading-[1.75] text-[#3a3750]">{entry.message}</p>
+              </article>
+            ))
+          )}
+
+          {hasMore && (
+            <div ref={observerTarget} className="py-6 text-center sm:hidden">
+              {loadingMore && <p className="text-[13px] text-[#7a7690]">더 불러오는 중…</p>}
+            </div>
+          )}
+
+          {total > itemsPerPage && (
+            <div className="hidden items-center justify-center gap-2 py-6 sm:flex">
+              <button onClick={() => fetchEntries(false, currentPage - 1)} disabled={currentPage === 1 || loading} className={V4.btnGhost}>이전</button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((page) => totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2))
+                  .map((page, index, arr) => {
+                    const prev = arr[index - 1];
+                    return (
+                      <div key={page} className="flex items-center gap-1">
+                        {prev && page - prev > 1 && <span className="px-1 text-[#a2a0b3]">…</span>}
+                        <button onClick={() => fetchEntries(false, page)} disabled={loading} className={`min-w-[40px] rounded-full px-3 py-2 text-[14px] font-medium transition-colors ${currentPage === page ? "bg-[#1c1b2e] text-white" : "bg-white text-[#3a3750] hover:bg-[#ece9f8]"}`}>{page}</button>
+                      </div>
+                    );
+                  })}
               </div>
-              {error && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
-                  {error}
-                </div>
+              <button onClick={() => fetchEntries(false, currentPage + 1)} disabled={currentPage >= totalPages || loading} className={V4.btnGhost}>다음</button>
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* password modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1c1b2e]/40 p-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { setShowPasswordModal(false); setModalPassword(""); setEditMessage(""); setTargetId(null); setError(""); } }}>
+          <div className={`${V4.card} w-full max-w-md p-7`} role="dialog" aria-modal="true">
+            <h3 className="text-[22px] font-bold tracking-tight">{modalType === "delete" ? "메시지 삭제" : "메시지 수정"}</h3>
+            <p className="mt-2 text-[14px] text-[#7a7690]">
+              {modalType === "delete" ? "작성할 때 설정한 비밀번호 또는 관리자 비밀번호를 입력해주세요." : "작성할 때 설정한 비밀번호를 입력해주세요."}
+            </p>
+            <div className="mt-5 flex flex-col gap-4">
+              {modalType === "edit" && (
+                <label className="flex flex-col gap-2 text-[14px] font-medium">
+                  메시지
+                  <textarea value={editMessage} onChange={(e) => setEditMessage(e.target.value)} maxLength={500} required rows={5} className={`${V4.input} resize-none`} />
+                  <span className="text-right text-[12px] font-normal text-[#a2a0b3]">{editMessage.length}/500</span>
+                </label>
               )}
-              <div className="flex gap-3 justify-end">
-                <button
-                  onClick={() => {
-                    setShowPasswordModal(false);
-                    setModalPassword("");
-                    setEditMessage("");
-                    setTargetId(null);
-                    setError("");
-                  }}
-                  className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/15 bg-white dark:bg-white/[0.05] hover:bg-gray-50 dark:hover:bg-white/[0.1] transition-colors"
-                >
-                  취소
-                </button>
+              <label className="flex flex-col gap-2 text-[14px] font-medium">
+                비밀번호
+                <input type="password" value={modalPassword} onChange={(e) => setModalPassword(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && modalType === "delete") handlePasswordConfirm(); }} className={V4.input} placeholder="비밀번호" autoFocus />
+              </label>
+              {error && <div className="rounded-xl bg-[#ffe4ea] px-4 py-3 text-[14px] text-[#b3264a]">{error}</div>}
+              <div className="flex justify-end gap-2">
+                <button onClick={() => { setShowPasswordModal(false); setModalPassword(""); setEditMessage(""); setTargetId(null); setError(""); }} className={V4.btnGhost}>취소</button>
                 <button
                   onClick={handlePasswordConfirm}
-                  disabled={
-                    !modalPassword ||
-                    (modalType === "edit" && !editMessage.trim()) ||
-                    deletingId !== null ||
-                    editingId !== null
-                  }
-                  className={`px-4 py-2 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    modalType === "delete"
-                      ? "bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600"
-                      : "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600"
-                  }`}
+                  disabled={!modalPassword || (modalType === "edit" && !editMessage.trim()) || deletingId !== null || editingId !== null}
+                  className={`${V4.btn} ${modalType === "delete" ? "!bg-[#b3264a] hover:!bg-[#8f1d3b]" : ""}`}
                 >
-                  {modalType === "delete"
-                    ? deletingId
-                      ? "삭제 중..."
-                      : "삭제"
-                    : editingId
-                    ? "수정 중..."
-                    : "수정"}
+                  {modalType === "delete" ? (deletingId ? "삭제 중…" : "삭제") : editingId ? "수정 중…" : "수정"}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </V4Shell>
   );
 }
 
