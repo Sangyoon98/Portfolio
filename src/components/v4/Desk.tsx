@@ -21,7 +21,10 @@ export type Platform = {
   color: string;
 };
 
-/** Anchor points (x, y, z) beside the devices for future props (a hobby model, a mascot…). y is the ground. */
+/**
+ * Anchor points (x, y, z) beside the devices for future props (a hobby model, a mascot…). y is the ground.
+ * Usage: pass a mesh via `extras` and set `position={ROOM_SLOTS.left}` — keep props under ~1.2 units tall so the devices stay the focus.
+ */
 export const ROOM_SLOTS = {
   left: [-5.2, 1.0, 0.6] as [number, number, number],
   right: [5.0, 1.0, 0.4] as [number, number, number],
