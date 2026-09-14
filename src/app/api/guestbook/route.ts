@@ -119,7 +119,7 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Crew Talk 작성
+// POST: 방명록 작성
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT: Crew Talk 수정
+// PUT: 방명록 수정
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
@@ -279,7 +279,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE: Crew Talk 삭제 (작성자 또는 관리자)
+// DELETE: 방명록 삭제 (작성자 또는 관리자)
 export async function DELETE(request: Request) {
   try {
     const body = await request.json();

@@ -32,7 +32,7 @@ export function V4Nav({ back }: { back?: { href: string; label: string } }) {
             <Link href="/#work" className="hover:text-[#1c1b2e]">경력</Link>
             <Link href="/#skills" className="hover:text-[#1c1b2e]">기술</Link>
             <Link href="/#projects" className="hover:text-[#1c1b2e]">프로젝트</Link>
-            <Link href="/guestbook" className="hover:text-[#1c1b2e]">Crew Talk</Link>
+            <Link href="/guestbook" className="hover:text-[#1c1b2e]">방명록</Link>
           </div>
           {back && (
             <Link href={back.href} className="rounded-full bg-[#1c1b2e] px-3.5 py-1.5 text-[13px] text-white transition-colors hover:bg-[#7c5cff]">

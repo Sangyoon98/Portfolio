@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { V4, V4Head, V4Shell } from "@/components/v4/Shell";
 
-// Crew Talk 항목 타입
+// 방명록 항목 타입
 type GuestbookEntry = {
   id: string;
   name: string;
@@ -12,7 +12,7 @@ type GuestbookEntry = {
   updatedAt?: string;
 };
 
-// Crew Talk 페이지 컴포넌트
+// 방명록 페이지 컴포넌트
 export default function GuestbookPage() {
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +116,7 @@ export default function GuestbookPage() {
     fetchEntries(true);
   }, []);
 
-  // Crew Talk 작성
+  // 방명록 작성
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -299,10 +299,10 @@ export default function GuestbookPage() {
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <V4Shell back={{ href: "/", label: "홈" }}>
-      <V4Head sub="Crew Talk" title="함께 일한 분들의 한마디">
+    <V4Shell back={{ href: "/#guestbook", label: "홈" }}>
+      <V4Head sub="Guestbook" title="방명록">
         <p className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-[#3a3750]">
-          같이 일했거나, 같이 만들었거나, 같이 배웠던 분이라면 한 줄 남겨주세요. 이름은 일부만 표시됩니다.
+          함께 일했던 이야기도, 응원 한마디도, 그냥 지나가다 남기는 인사도 좋습니다. 이름은 일부만 표시됩니다.
         </p>
       </V4Head>
 
