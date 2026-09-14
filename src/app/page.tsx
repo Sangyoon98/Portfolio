@@ -106,7 +106,7 @@ export default function V4Page() {
             </p>
           </div>
         </div>
-        <div className="relative mt-6 h-[440px] sm:h-[560px] lg:h-[calc(100vh-380px)] lg:min-h-[520px]">
+        <div className="relative mt-6" style={{ height: "clamp(440px, calc(100vh - 340px), 820px)" }}>
           <DeskCanvas platforms={platforms} onSelect={pick} />
           <div className="pointer-events-none absolute inset-x-0 bottom-20 flex justify-center text-[13px] text-[#7a7690]"><span className="rounded-full bg-white/80 px-4 py-1.5 backdrop-blur">기기 하나가 플랫폼 하나, 크기가 경험량. 눌러서 그 플랫폼 프로젝트 보기</span></div>
           <div className="absolute inset-x-0 bottom-6 flex justify-center">

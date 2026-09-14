@@ -222,7 +222,7 @@ function AndroidPhone({ p, position, rotation, onSelect }: DeviceProps) {
           <meshBasicMaterial map={screen} toneMapped={false} transparent />
         </mesh>
       </group>
-      <Label p={p} hover={hover} y={h + 0.25} />
+      <Label p={p} hover={hover} y={h + 0.12} />
     </group>
   );
 }
@@ -249,7 +249,7 @@ function IPhone({ p, position, rotation, onSelect }: DeviceProps) {
         <mesh position={[-w / 2 - 0.01, 0.2, 0]}><boxGeometry args={[0.02, 0.32, 0.05]} /><meshStandardMaterial color="#d8cfd8" /></mesh>
         <mesh position={[w / 2 + 0.01, 0.35, 0]}><boxGeometry args={[0.02, 0.45, 0.05]} /><meshStandardMaterial color="#d8cfd8" /></mesh>
       </group>
-      <Label p={p} hover={hover} y={h + 0.25} />
+      <Label p={p} hover={hover} y={h + 0.12} />
     </group>
   );
 }
@@ -283,7 +283,7 @@ function MacBook({ p, position, rotation, onSelect }: DeviceProps) {
           </mesh>
         </group>
       </group>
-      <Label p={p} hover={hover} y={SH + 0.45} />
+      <Label p={p} hover={hover} y={SH + 0.3} />
     </group>
   );
 }
@@ -297,7 +297,7 @@ function Ground() {
 function Parallax({ children }: { children: ReactNode }) {
   const g = useRef<THREE.Group>(null!);
   const { pointer, viewport } = useThree();
-  const fit = Math.min(1, viewport.width / 11.5);
+  const fit = Math.min(1, viewport.width / 12.5);
   useFrame(() => {
     g.current.rotation.y += (pointer.x * 0.09 - g.current.rotation.y) * 0.06;
     g.current.rotation.x += (-pointer.y * 0.03 - g.current.rotation.x) * 0.06;
@@ -310,7 +310,7 @@ export function DeskCanvas({ platforms, onSelect, extras }: { platforms: Platfor
   const ios = platforms.find((p) => p.key === "ios")!;
   const web = platforms.find((p) => p.key === "web")!;
   return (
-    <Canvas shadows="soft" camera={{ position: [0.3, 3.0, 9.6], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.7, -0.2)}>
+    <Canvas shadows="soft" camera={{ position: [0.3, 3.4, 10.6], fov: 34 }} dpr={[1, 1.5]} gl={{ alpha: true, antialias: true }} onCreated={({ camera }) => camera.lookAt(0, 1.95, -0.2)}>
       {/* studio light built from light panels — no HDR download */}
       <Environment resolution={128}>
         <Lightformer intensity={1.6} form="rect" position={[0, 6, -3]} scale={[12, 5, 1]} target={[0, 0, 0]} />
