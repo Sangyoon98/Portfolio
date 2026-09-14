@@ -1,13 +1,12 @@
 "use client";
 
 import { use } from "react";
-import { projects } from "@/data/portfolio";
+import { projects, slugMap } from "@/data/portfolio";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import ImageGallery from "@/components/ImageGallery";
-import { slugMap } from "@/components/ProjectsSection";
 import { V4, V4Head, V4Shell } from "@/components/v4/Shell";
 
 interface ProjectPageProps {
@@ -75,7 +74,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
   const others = project.links?.filter((l) => !l.label.includes("상세") && l !== github && !stores.includes(l)) ?? [];
 
   return (
-    <V4Shell back={{ href: "/v4#projects", label: "프로젝트" }}>
+    <V4Shell back={{ href: "/#projects", label: "프로젝트" }}>
       {/* head */}
       <V4Head sub={`${project.period ?? ""}${project.company ? ` · ${project.company}` : ""}`} title={project.title}>
         <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -159,7 +158,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       )}
 
       <div className="mt-12 flex items-center justify-between text-[14px] text-[#7a7690]">
-        <Link href="/v4#projects" className="hover:text-[#1c1b2e]">← 다른 프로젝트 보기</Link>
+        <Link href="/#projects" className="hover:text-[#1c1b2e]">← 다른 프로젝트 보기</Link>
         <Link href="/guestbook" className="hover:text-[#1c1b2e]">Crew Talk 남기기 →</Link>
       </div>
     </V4Shell>
