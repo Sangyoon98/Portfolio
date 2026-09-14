@@ -159,7 +159,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
 
       <div className="mt-12 flex items-center justify-between text-[14px] text-[#7a7690]">
         <Link href="/#projects" className="hover:text-[#1c1b2e]">← 다른 프로젝트 보기</Link>
-        <Link href="/guestbook" className="hover:text-[#1c1b2e]">Crew Talk 남기기 →</Link>
+        <Link href="/guestbook" className="hover:text-[#1c1b2e]">방명록 남기기 →</Link>
       </div>
     </V4Shell>
   );
