@@ -272,6 +272,25 @@ export const certifications: Certification[] = [
   },
 ];
 
+/** 프로젝트 제목 → 상세 페이지 슬러그 */
+export const slugMap: { [key: string]: string } = {
+  "메가스터디 스마트러닝": "megastudy-smart-learning",
+  "모셔용 (MSDragon)": "mosheoyong",
+  "삼품관리(33Auto)": "33auto",
+  "Trever (Trade-Ever)": "trever",
+  "타보니까 (TarboniCar)": "tarbonicar",
+  "인사이드무비 (InsideMovie)": "inside-movie",
+  "콩오더 (KongOrder)": "kongorder",
+  "휴런 Strocare Suite Mobile": "strocare",
+  "강남 Nutrition Care": "kangnam-nutrition",
+  점심시간이야기: "lunch-time",
+  "로아랑 (LoaRang)": "loarang",
+  Farm2Seoul: "farm2seoul",
+  "Udo-Olleh": "udo-olleh",
+  "강남대 뭐먹지?": "kangnam-food",
+  "용인고 App": "yongin-high",
+};
+
 export const projects: Project[] = [
   {
     title: "메가스터디 스마트러닝",
@@ -310,10 +329,15 @@ export const projects: Project[] = [
       "Google Play In-App Review",
       "Firebase App Distribution",
     ],
+    links: [
+      { label: "Google Play", href: "https://play.google.com/store/apps/details?id=net.megastudy.smartplay.main" },
+      { label: "상세 보기", href: "/projects/megastudy-smart-learning" },
+    ],
     period: "2026.03. ~ 현재",
     role: "Android Developer",
     company: "메가스터디교육(주)",
     status: "운영 중인 서비스",
+    image: "/projects/megastudy/cover.png",
   },
   {
     title: "모셔용 (MSDragon)",

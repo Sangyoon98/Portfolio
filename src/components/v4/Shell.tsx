@@ -22,16 +22,16 @@ export function V4Nav({ back }: { back?: { href: string; label: string } }) {
   return (
     <header className="fixed inset-x-0 top-0 z-40 bg-[#f6f6fb]/75 backdrop-blur-xl">
       <nav className={`${V4.section} flex h-16 items-center justify-between`}>
-        <Link href="/v4" className="flex items-center gap-3 font-bold">
+        <Link href="/" className="flex items-center gap-3 font-bold">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#1c1b2e] text-sm text-white">채</span>
           채상윤 <span className="hidden font-medium text-[#7a7690] sm:inline">| Android Developer</span>
         </Link>
         <div className="flex items-center gap-8 text-[15px] text-[#7a7690]">
           <div className="hidden gap-8 sm:flex">
-            <Link href="/v4#about" className="hover:text-[#1c1b2e]">소개</Link>
-            <Link href="/v4#work" className="hover:text-[#1c1b2e]">경력</Link>
-            <Link href="/v4#skills" className="hover:text-[#1c1b2e]">기술</Link>
-            <Link href="/v4#projects" className="hover:text-[#1c1b2e]">프로젝트</Link>
+            <Link href="/#about" className="hover:text-[#1c1b2e]">소개</Link>
+            <Link href="/#work" className="hover:text-[#1c1b2e]">경력</Link>
+            <Link href="/#skills" className="hover:text-[#1c1b2e]">기술</Link>
+            <Link href="/#projects" className="hover:text-[#1c1b2e]">프로젝트</Link>
             <Link href="/guestbook" className="hover:text-[#1c1b2e]">Crew Talk</Link>
           </div>
           {back && (

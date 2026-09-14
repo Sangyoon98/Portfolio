@@ -299,7 +299,7 @@ export default function GuestbookPage() {
   const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
-    <V4Shell back={{ href: "/v4", label: "홈" }}>
+    <V4Shell back={{ href: "/", label: "홈" }}>
       <V4Head sub="Crew Talk" title="함께 일한 분들의 한마디">
         <p className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-[#3a3750]">
           같이 일했거나, 같이 만들었거나, 같이 배웠던 분이라면 한 줄 남겨주세요. 이름은 일부만 표시됩니다.
